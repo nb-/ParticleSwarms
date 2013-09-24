@@ -4,6 +4,10 @@
 #include "population.h"
 #include "qcustomplot.h"
 
+//==================================================================
+//    Class which provides UI control interface for optimizers
+//==================================================================
+
 class OptimizerController
 {
 protected:
@@ -13,27 +17,26 @@ protected:
     QCPGraph* mBestPointGraph;
     QCPGraph* mValueGraph;
 
-    int mGenNumber;
 
 public:
 
     OptimizerController(Population* population);
     ~OptimizerController();
 
-    double getBestValue();
-    int getGenNum();
+    double getBestValue() const;
+    int getGenNum() const;
 
     void initializePopulation();
     void step();
     void runFor(int iterations);
 
-    double getLowerBound(int dim);
-    double getUpperBound(int dim);
+    double getLowerBound(int dim) const;
+    double getUpperBound(int dim) const;
 
-    double getUpperFit(int dim);
-    double getLowerFit(int dim);
+    double getUpperFit(int dim) const;
+    double getLowerFit(int dim) const;
 
-    void plotData(int xDim, int yDim);
+    void plotData(int xDim, int yDim) const;
     void initGraphs(QCustomPlot* plot, QCustomPlot* graph);
     void removeGraphs(QCustomPlot* plot, QCustomPlot* graph);
 };

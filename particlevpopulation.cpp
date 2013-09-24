@@ -11,6 +11,11 @@ ParticleVPopulation::~ParticleVPopulation()
     delete[] mVelocities;
 }
 
+double *ParticleVPopulation::getVelocityPointer(int individualIndex) const
+{
+    return &(mVelocities[mDim * individualIndex]);
+}
+
 void ParticleVPopulation::initializePopulation(double *range)
 {
     Population::initializePopulation();
@@ -27,7 +32,6 @@ void ParticleVPopulation::initializePopulation(double *range)
     {
         temp = abs((range[mDim + j] - range[j]));
         mVelocities[i] = (temp * -1) + ( ((double)rand()/(double)RAND_MAX) * (2 * temp));
-        //mVelocities[i] = 0;
         ++i;
         ++j;
         if(j==mDim) j = 0;

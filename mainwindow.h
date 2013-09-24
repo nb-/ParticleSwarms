@@ -21,17 +21,23 @@ private:
     OptimizerController* mOptimizer;
 
     QDebugStream* qout;
+
+    OptimizerController* createOptimizer(QString optName);
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
     void initPlot();
-    void plotData(int xDim, int yDim);
+    void plotData();
 
     void stepButtonPressed();
+    void runForButtonPressed();
     void initButtonPressed();
 
+    void zoomBoundsButtonPressed();
+    void zoomFitButtonPressed();
 
 };
+
 
 #endif // MAINWINDOW_H

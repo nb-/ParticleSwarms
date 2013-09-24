@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1111</width>
+    <width>1564</width>
     <height>777</height>
    </rect>
   </property>
@@ -20,14 +20,14 @@
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,1">
           <item>
            <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0">
             <item>
              <widget class="QCustomPlot" name="plot" native="true"/>
             </item>
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_6">
+             <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="1,1,1,1,1">
               <item>
                <widget class="QPushButton" name="zoomBoundsButton">
                 <property name="text">
@@ -39,6 +39,33 @@
                <widget class="QPushButton" name="zoomFitButton">
                 <property name="text">
                  <string>Zoom to Fit</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_3">
+                <property name="text">
+                 <string>Dimensions:</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="plotXDimSpin">
+                <property name="maximum">
+                 <number>999999999</number>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="plotYDimSpin">
+                <property name="maximum">
+                 <number>999999999</number>
+                </property>
+                <property name="value">
+                 <number>1</number>
                 </property>
                </widget>
               </item>
@@ -101,18 +128,49 @@
              </layout>
             </item>
             <item>
-             <widget class="QPushButton" name="initButton">
-              <property name="text">
-               <string>Initialize</string>
-              </property>
-             </widget>
+             <layout class="QHBoxLayout" name="horizontalLayout_8">
+              <item>
+               <widget class="QPushButton" name="initButton">
+                <property name="text">
+                 <string>Initialize</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="optimizerCombo"/>
+              </item>
+             </layout>
             </item>
             <item>
-             <widget class="QPushButton" name="stepButton">
-              <property name="text">
-               <string>Step</string>
-              </property>
-             </widget>
+             <layout class="QHBoxLayout" name="horizontalLayout_7">
+              <item>
+               <widget class="QPushButton" name="stepButton">
+                <property name="text">
+                 <string>Step</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="runForButton">
+                <property name="text">
+                 <string>Run for:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="runForSpin">
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>999999999</number>
+                </property>
+                <property name="value">
+                 <number>100</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
            </layout>
           </item>
@@ -136,7 +194,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1111</width>
+     <width>1564</width>
      <height>21</height>
     </rect>
    </property>

@@ -4,8 +4,7 @@ OptimizerController::OptimizerController(Population* population)
    :mPopulation(population),
     mDataGraph(0),
     mBestPointGraph(0),
-    mValueGraph(0),
-    mGenNumber(0)
+    mValueGraph(0)
 {
     population->initializePopulation();
 }
@@ -17,7 +16,7 @@ OptimizerController::~OptimizerController()
     if(mPopulation!=0) delete mPopulation;
 }
 
-void OptimizerController::plotData(int xDim, int yDim)
+void OptimizerController::plotData(int xDim, int yDim) const
 {
     if(mDataGraph == 0 || mBestPointGraph == 0) return;
 
@@ -35,7 +34,7 @@ void OptimizerController::plotData(int xDim, int yDim)
     dataPointer = mPopulation->getBestPositionFoundPointer();
     mBestPointGraph->addData( dataPointer[xDim], dataPointer[yDim] );
 
-    mValueGraph->addData(mGenNumber, mPopulation->getBestValueFound());
+    mValueGraph->addData(mPopulation->getGenerationNumber(), mPopulation->getBestValueFound());
 }
 void OptimizerController::initGraphs(QCustomPlot* plot, QCustomPlot* graph)
 {
@@ -44,7 +43,7 @@ void OptimizerController::initGraphs(QCustomPlot* plot, QCustomPlot* graph)
     mDataGraph->clearData();
     mDataGraph->setLineStyle( QCPGraph::lsNone );
     mDataGraph->setScatterStyle( QCP::ssCircle );
-    mDataGraph->setScatterSize(2);
+    mDataGraph->setScatterSize(3);
     mDataGraph->setPen( QPen( QColor("blue") ));
 
     if(mBestPointGraph==0) mBestPointGraph = plot->addGraph();
@@ -52,7 +51,7 @@ void OptimizerController::initGraphs(QCustomPlot* plot, QCustomPlot* graph)
     mBestPointGraph->setLineStyle( QCPGraph::lsNone );
     mBestPointGraph->setScatterStyle( QCP::ssCross );
     mBestPointGraph->setScatterSize(7);
-    mBestPointGraph->setPen( QPen( QColor("red") ));
+    mBestPointGraph->setPen( QPen( QBrush(QColor("red")), 3 ));
 
     if(mValueGraph==0) mValueGraph = graph->addGraph();
     mValueGraph->clearData();
@@ -74,34 +73,31 @@ void OptimizerController::removeGraphs(QCustomPlot *plot, QCustomPlot* graph)
 void OptimizerController::initializePopulation()
 {
     mPopulation->initializePopulation();
-    mGenNumber = 0;
 }
 
 void OptimizerController::step()
 {
-    mPopulation->updatePopulation();
-    ++mGenNumber;
+    mPopulation->step();
 }
 void OptimizerController::runFor(int iterations)
 {
-    mGenNumber += iterations;
     while(iterations > 0)
     {
-        mPopulation->updatePopulation();
+        mPopulation->step();
         --iterations;
     }
 }
 
-double OptimizerController::getBestValue()
+double OptimizerController::getBestValue() const
 {
     return mPopulation->getBestValueFound();
 }
-int OptimizerController::getGenNum(){return mGenNumber;}
+int OptimizerController::getGenNum() const{return mPopulation->getGenerationNumber();}
 
-double OptimizerController::getLowerBound(int dim){ return mPopulation->getLowerBound(dim); }
-double OptimizerController::getUpperBound(int dim){ return mPopulation->getUpperBound(dim); }
+double OptimizerController::getLowerBound(int dim) const{ return mPopulation->getLowerBound(dim); }
+double OptimizerController::getUpperBound(int dim) const{ return mPopulation->getUpperBound(dim); }
 
-double OptimizerController::getUpperFit(int dim)
+double OptimizerController::getUpperFit(int dim) const
 {
     if(dim >= mPopulation->getDim()) return 0;
 
@@ -117,7 +113,7 @@ double OptimizerController::getUpperFit(int dim)
     return upper;
 }
 
-double OptimizerController::getLowerFit(int dim)
+double OptimizerController::getLowerFit(int dim) const
 {
     if(dim >= mPopulation->getDim()) return 0;
 

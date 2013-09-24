@@ -20,16 +20,17 @@ SOURCES += main.cpp\
     optimizercontroller.cpp\
     population.cpp \
     particlevpopulation.cpp \
-    canonpsopopulation.cpp
+    canonpsopopulation.cpp \
+    constrictionpsopopulation.cpp
 
 HEADERS  += mainwindow.h \
-    Point.h \
     optimizationFunctions.h \
     QDebugStream.h \
     qcustomplot.h \
     optimizercontroller.h\
     population.h \
     particlevpopulation.h \
-    canonpsopopulation.h
+    canonpsopopulation.h \
+    constrictionpsopopulation.h
 
 FORMS    += mainwindow.ui

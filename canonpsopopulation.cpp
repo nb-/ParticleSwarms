@@ -13,9 +13,9 @@ CanonPSOPopulation::~CanonPSOPopulation()
 
 }
 
-double CanonPSOPopulation::getInertia()   {   return mInertia;  }
-double CanonPSOPopulation::getPAccel()    {   return mPAccel;   }
-double CanonPSOPopulation::getGAccel()    {   return mGAccel;   }
+double CanonPSOPopulation::getInertia() const {return mInertia;}
+double CanonPSOPopulation::getPAccel() const {return mPAccel;}
+double CanonPSOPopulation::getGAccel() const {return mGAccel;}
 
 void CanonPSOPopulation::setInertia(double inertia) {   mInertia = inertia; }
 void CanonPSOPopulation::setPAccel(double pAccel)   {   mPAccel = pAccel;   }

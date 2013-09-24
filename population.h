@@ -1,12 +1,20 @@
 #ifndef POPULATION_H
 #define POPULATION_H
 
+//==================================================================
+//    Base Class for Population Based BB Optimizer | Abstract
+//==================================================================
+
+//TODO: Abstract further, currently contains info only needed by PSO, should work for any pop based bb opt
+
 class Population
 {
 protected:
 
     const int mSize;
     const int mDim;
+
+    int mGenNum;
 
     int mBestPointIndex;
 
@@ -23,20 +31,23 @@ public:
     Population(int size, int dim, void (*optFunc)(int dim, double *position, double &value), double* bounds);
     virtual ~Population();
 
-    const int getPopSize();
-    const int getDim();
+    int getPopSize() const;
+    int getDim() const;
+    int getGenerationNumber() const;
 
-    int     getBestIndividualIndex();
-    double  getBestValueFound();
-    double*  getBestPositionFoundPointer();
+    int     getBestIndividualIndex() const;
+    double  getBestValueFound() const;
+    double* getBestPositionFoundPointer() const;
 
-    double  getValue(int individualIndex);
-    double* getPositionPointer(int individualIndex);
-    double  getPrevBestValue(int individualIndex);
-    double* getPrevBestPositionPointer(int individualIndex);
+    double  getValue(int individualIndex) const;
+    double* getPositionPointer(int individualIndex) const;
+    double  getPrevBestValue(int individualIndex) const;
+    double* getPrevBestPositionPointer(int individualIndex) const;
 
-    double getLowerBound(int dim);
-    double getUpperBound(int dim);
+    double getLowerBound(int dim) const;
+    double getUpperBound(int dim) const;
+
+    void step();
 
     virtual void initializePopulation(double* range = 0);
     virtual void evaluatePopulation();

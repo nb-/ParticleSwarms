@@ -1,6 +1,12 @@
 #ifndef OPTIMIZATIONFUNCTIONS_H
 #define OPTIMIZATIONFUNCTIONS_H
 
+//==================================================================
+//    Optimiziation Benchmark Functions
+//==================================================================
+
+//TODO: Possibly change from simple function pointers to objects to make shifting/rotating space easier and provide defaults
+
 #define _USE_MATH_DEFINES
 #include <math.h>
 

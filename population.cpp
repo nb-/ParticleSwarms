@@ -13,6 +13,7 @@ Population::Population(int size, int dim, void (*optFunc)(int dim, double *posit
     //mOptFunction(optFunc),
     //mBestPointIndex(0)
 {
+    mGenNum = 0;
     mBounds = bounds;
     mValues = new double[mSize];
     mPositions=new double[mSize * mDim];
@@ -30,19 +31,25 @@ Population::~Population()
     delete[] mValues;
 }
 
-double Population::getLowerBound(int dim)
+double Population::getLowerBound(int dim) const
 {
     if(dim < mDim && dim >= 0)
         return mBounds[dim];
     else
         return 0;
 }
-double Population::getUpperBound(int dim)
+double Population::getUpperBound(int dim) const
 {
     if(dim < mDim && dim >= 0)
         return mBounds[dim + mDim];
     else
         return 0;
+}
+
+void Population::step()
+{
+    ++mGenNum;
+    updatePopulation();
 }
 
 void Population::evaluatePopulation()
@@ -74,6 +81,8 @@ void Population::initializePopulation(double *range)
         range = mBounds;
     //add null checks for all things
 
+    mGenNum = 0;
+
     int i = 0;
     int j = 0;
     int maxIt = mSize * mDim;
@@ -97,18 +106,20 @@ void Population::initializePopulation(double *range)
 }
 
 
-const int Population::getPopSize()  { return mSize; }
-const int Population::getDim()      { return mDim; }
+int Population::getPopSize() const { return mSize; }
+int Population::getDim() const { return mDim; }
 
-int Population::getBestIndividualIndex()            { return mBestPointIndex; }
-double Population::getBestValueFound()              { return mValues[mBestPointIndex]; }
-double* Population::getBestPositionFoundPointer()   { return mPositions + (sizeof(double) * mBestPointIndex); }
+int Population::getGenerationNumber() const { return mGenNum; }
 
-double Population::getValue(int individualIndex)            { return mValues[individualIndex]; }
-double* Population::getPositionPointer(int individualIndex) { return mPositions + (sizeof(double) * individualIndex); }
+int Population::getBestIndividualIndex() const { return mBestPointIndex; }
+double Population::getBestValueFound() const { return mPrevBestValues[mBestPointIndex]; }
+double* Population::getBestPositionFoundPointer() const { return &(mPrevBestPositions[mDim * mBestPointIndex]); }
 
-double Population::getPrevBestValue(int individualIndex)            { return mPrevBestValues[individualIndex]; }
-double* Population::getPrevBestPositionPointer(int individualIndex) { return mPrevBestPositions + (sizeof(double) * individualIndex); }
+double Population::getValue(int individualIndex) const { return mValues[individualIndex]; }
+double* Population::getPositionPointer(int individualIndex) const { return &(mPositions[mDim * individualIndex]); }
+
+double Population::getPrevBestValue(int individualIndex) const { return mPrevBestValues[individualIndex]; }
+double* Population::getPrevBestPositionPointer(int individualIndex) const { return &(mPrevBestPositions[mDim * individualIndex]); }
 
 
 

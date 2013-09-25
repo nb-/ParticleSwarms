@@ -22,13 +22,17 @@ private:
 
     QDebugStream* qout;
 
-    OptimizerController* createOptimizer(QString optName);
+    void createOptimizer(QString optName);
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
     void initPlot();
     void plotData();
+
+    void updateGraphScale();
+
+    void optComboChanged();
 
     void stepButtonPressed();
     void runForButtonPressed();

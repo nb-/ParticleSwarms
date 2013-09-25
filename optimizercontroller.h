@@ -3,6 +3,8 @@
 
 #include "population.h"
 #include "qcustomplot.h"
+#include <QGridLayout>
+
 
 //==================================================================
 //    Class which provides UI control interface for optimizers
@@ -17,18 +19,21 @@ protected:
     QCPGraph* mBestPointGraph;
     QCPGraph* mValueGraph;
 
+    QGridLayout* mParLayout;
 
 public:
-
-    OptimizerController(Population* population);
-    ~OptimizerController();
+    OptimizerController();
+    virtual ~OptimizerController();
 
     double getBestValue() const;
     int getGenNum() const;
 
+    int getPopulationSize() const;
+    int getDimension() const;
+
     void initializePopulation();
     void step();
-    void runFor(int iterations);
+    void runFor(int iterations, bool graph);
 
     double getLowerBound(int dim) const;
     double getUpperBound(int dim) const;
@@ -36,9 +41,15 @@ public:
     double getUpperFit(int dim) const;
     double getLowerFit(int dim) const;
 
-    void plotData(int xDim, int yDim) const;
-    void initGraphs(QCustomPlot* plot, QCustomPlot* graph);
-    void removeGraphs(QCustomPlot* plot, QCustomPlot* graph);
+    virtual void plotData(int xDim, int yDim) const;
+    virtual void graphValues() const;
+
+    virtual void initGraphs(QCustomPlot* plot, QCustomPlot* graph);
+    virtual void removeGraphs(QCustomPlot* plot, QCustomPlot* graph);
+
+    virtual void setParameterBox(QWidget* parent) = 0;
+    void removeParameterBox(QWidget* parent);
+    virtual void initializeOptimizer() = 0;
 };
 
 #endif // OPTIMIZERCONTROLLER_H

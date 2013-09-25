@@ -7,6 +7,8 @@
 #include "population.h"
 #include "canonpsopopulation.h"
 #include "optimizationFunctions.h"
+#include "canonpsocontroller.h"
+#include "constrictionpsocontroller.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -29,13 +31,50 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->plotXDimSpin, &QAbstractSpinBox::editingFinished, this, &MainWindow::plotData);
     QObject::connect(ui->plotYDimSpin, &QAbstractSpinBox::editingFinished, this, &MainWindow::plotData);
 
-    qout = new QDebugStream(std::cout, ui->textEdit);
+    QObject::connect(ui->logCheckBox, &QCheckBox::clicked, this, &MainWindow::updateGraphScale);
 
+    QObject::connect(ui->optimizerCombo,
+            static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
+            this,
+            &MainWindow::optComboChanged);
+
+
+    qout = new QDebugStream(std::cout, ui->textEdit);  
+
+
+
+    optComboChanged();
 }
 
-OptimizerController *MainWindow::createOptimizer(QString optName)
-{//maybe figure out a better method of doing this
+void MainWindow::createOptimizer(QString optName)
+{
+    if(mOptimizer!=0)
+    {
+        mOptimizer->removeGraphs(ui->plot, ui->graph);
 
+        //currently parameter box is cleared in a hackish way
+        //todo: find a better way
+
+        delete mOptimizer;
+        mOptimizer = 0;
+    }
+
+    if( QString::compare( optName, "canon" ) == 0) // Canonical PSO
+    {
+        mOptimizer = new CanonPSOController();
+    }
+    else if ( QString::compare( optName, "constriction" ) == 0) // Constriction PSO
+    {
+        mOptimizer = new ConstrictionPSOController();
+    }
+    else
+    {
+        return;
+    }
+
+
+
+    mOptimizer->setParameterBox(ui->parameterContainer);
 
 }
 
@@ -54,6 +93,8 @@ void MainWindow::initPlot()
     ui->plot->xAxis->setRange( mOptimizer->getLowerBound( ui->plotXDimSpin->value() ), mOptimizer->getUpperBound( ui->plotXDimSpin->value() ) );
     ui->plot->yAxis->setRange( mOptimizer->getLowerBound( ui->plotYDimSpin->value() ), mOptimizer->getUpperBound( ui->plotYDimSpin->value() ) );
 
+    updateGraphScale();
+
     ui->plot->replot();
     ui->graph->replot();
 }
@@ -65,9 +106,27 @@ void MainWindow::plotData()
     int yDim = ui->plotYDimSpin->value();
 
     mOptimizer->plotData(xDim, yDim);
+    mOptimizer->graphValues();
     ui->graph->xAxis->setRange(0, mOptimizer->getGenNum() + 1);
     ui->plot->replot();
     ui->graph->replot();
+}
+
+void MainWindow::updateGraphScale()
+{
+    if(ui->logCheckBox->checkState() == Qt::Checked)
+        ui->graph->yAxis->setScaleType(QCPAxis::stLogarithmic);
+    else
+        ui->graph->yAxis->setScaleType(QCPAxis::stLinear);
+
+    ui->graph->yAxis->setScaleLogBase( 10 );
+    ui->graph->replot();
+}
+
+void MainWindow::optComboChanged()
+{
+    QString what = ui->optimizerCombo->itemData(ui->optimizerCombo->currentIndex()).toString();
+    createOptimizer(what);
 }
 
 void MainWindow::stepButtonPressed()
@@ -82,7 +141,7 @@ void MainWindow::stepButtonPressed()
 void MainWindow::runForButtonPressed()
 {
     if(mOptimizer == 0) return;
-    mOptimizer->runFor( ui->runForSpin->value() );
+    mOptimizer->runFor( ui->runForSpin->value(), ui->graphCheck->checkState() == Qt::Checked);
     plotData();
 
     std::cout << "Best: " <<  mOptimizer->getBestValue() << std::endl;
@@ -90,30 +149,12 @@ void MainWindow::runForButtonPressed()
 void MainWindow::initButtonPressed()
 {
 
-        if(mOptimizer!=0)
-        {
-            mOptimizer->removeGraphs(ui->plot, ui->graph);
-            delete mOptimizer;
-        }
 
-        int dim = ui->dimNumSpin->value();
-        if(dim < 1) dim = 1;
-
-        ui->plotXDimSpin->setMaximum(dim - 1);
-        ui->plotYDimSpin->setMaximum(dim - 1);
-
-        int popSize = ui->popSizeSpin->value();
-        if(popSize < 1) popSize = 1;
-        double* bounds = new double[dim * 2];
-        for(int i = 0 ; i < dim; ++i)
-        {
-            bounds[i] = -10;
-            bounds[i + dim] = 10;
-        }
-        Population* p = new CanonPSOPopulation(popSize, dim, 0.7, 1, 1, &(OptimizationFunctions::Sphere), bounds);
-        mOptimizer = new OptimizerController(p);
-        initPlot();
-        plotData();
+    mOptimizer->initializeOptimizer();
+    ui->plotXDimSpin->setMaximum(mOptimizer->getDimension() - 1);
+    ui->plotYDimSpin->setMaximum(mOptimizer->getDimension() - 1);
+    initPlot();
+    plotData();
 }
 
 void MainWindow::zoomBoundsButtonPressed()

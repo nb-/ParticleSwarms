@@ -38,6 +38,7 @@ void ConstrictionPSOPopulation::updatePopulation()
     int minJIt = mBestPointIndex * mDim;
     int i = 0;
     int j = minJIt;
+    int k = 0;
     int maxJIt = minJIt + mDim;
     int maxIIt = mSize * mDim;
 
@@ -49,10 +50,32 @@ void ConstrictionPSOPopulation::updatePopulation()
                                 + ( ((double)rand()/(double)RAND_MAX) * mGAccel * (mPrevBestPositions[j] - mPositions[i]) )
                             )
                             * mConstrictionCoef;
+
+        if(mVelocities[i] > (mBounds[mDim + k] - mBounds[k]))
+        {
+            mVelocities[i] = (mBounds[mDim + k] - mBounds[k]);
+        }
+        else if(mVelocities[i] < (mBounds[k] - mBounds[mDim + k]))
+        {
+            mVelocities[i] = (mBounds[k] - mBounds[mDim + k]);
+        }
+
+
         mPositions[i]   += mVelocities[i];
+
+        if(mPositions[i] > mBounds[mDim + k])
+        {
+            mPositions[i] = mBounds[mDim + k];
+        }
+        else if(mPositions[i] < mBounds[k])
+        {
+            mPositions[i] = mBounds[k];
+        }
         ++i;
         ++j;
+        ++k;
         if(j==maxJIt) j = minJIt;
+        if(k==mDim) k = 0;
     }
 
     evaluatePopulation();
@@ -61,5 +84,5 @@ void ConstrictionPSOPopulation::updatePopulation()
 void ConstrictionPSOPopulation::setConstrictionCoef()
 {
     double p = mPAccel + mGAccel;
-    mConstrictionCoef = ((double)2) / ( 2 -  p - sqrt( (p * p) - (4 * p)));
+    mConstrictionCoef = ((double)2) / abs( 2 -  p - sqrt( (p * p) - (4 * p)));
 }

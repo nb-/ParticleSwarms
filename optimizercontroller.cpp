@@ -1,19 +1,29 @@
 #include "optimizercontroller.h"
 
-OptimizerController::OptimizerController(Population* population)
-   :mPopulation(population),
+
+OptimizerController::OptimizerController()
+   :mPopulation(0),
+    mParLayout(0),
     mDataGraph(0),
     mBestPointGraph(0),
     mValueGraph(0)
 {
-    population->initializePopulation();
 }
 
 OptimizerController::~OptimizerController()
 {
-    if(mDataGraph!=0) delete mDataGraph;
-    if(mBestPointGraph!=0) delete mBestPointGraph;
-    if(mPopulation!=0) delete mPopulation;
+    delete mPopulation;
+
+    foreach (QObject *object, mParLayout->parent()->children()) {
+      QWidget *widget = qobject_cast<QWidget*>(object);
+      if (widget) {
+        delete widget;
+      }
+    }
+
+    delete mParLayout;
+    delete mDataGraph;
+    delete mBestPointGraph;
 }
 
 void OptimizerController::plotData(int xDim, int yDim) const
@@ -33,9 +43,13 @@ void OptimizerController::plotData(int xDim, int yDim) const
 
     dataPointer = mPopulation->getBestPositionFoundPointer();
     mBestPointGraph->addData( dataPointer[xDim], dataPointer[yDim] );
+}
 
+void OptimizerController::graphValues() const
+{
     mValueGraph->addData(mPopulation->getGenerationNumber(), mPopulation->getBestValueFound());
 }
+
 void OptimizerController::initGraphs(QCustomPlot* plot, QCustomPlot* graph)
 {
     if(mDataGraph==0) mDataGraph = plot->addGraph();
@@ -56,10 +70,11 @@ void OptimizerController::initGraphs(QCustomPlot* plot, QCustomPlot* graph)
     if(mValueGraph==0) mValueGraph = graph->addGraph();
     mValueGraph->clearData();
     mValueGraph->setLineStyle( QCPGraph::lsLine );
-    mValueGraph->setScatterStyle( QCP::ssCircle );
+    mValueGraph->setScatterStyle( QCP::ssNone );
     mValueGraph->setScatterSize(4);
-    mValueGraph->setPen( QPen( QColor("red") ));
+    mValueGraph->setPen( QPen( QBrush(QColor("red")), 1 ));
 }
+
 void OptimizerController::removeGraphs(QCustomPlot *plot, QCustomPlot* graph)
 {
     plot->removeGraph(mDataGraph);
@@ -79,21 +94,31 @@ void OptimizerController::step()
 {
     mPopulation->step();
 }
-void OptimizerController::runFor(int iterations)
+void OptimizerController::runFor(int iterations, bool graph)
 {
-    while(iterations > 0)
+    if(graph)
     {
-        mPopulation->step();
-        --iterations;
+        while(iterations > 0)
+        {
+            mPopulation->step();
+            graphValues();
+            --iterations;
+        }
+    }
+    else
+    {
+        while(iterations > 0)
+        {
+            mPopulation->step();
+            --iterations;
+        }
     }
 }
 
-double OptimizerController::getBestValue() const
-{
-    return mPopulation->getBestValueFound();
-}
-int OptimizerController::getGenNum() const{return mPopulation->getGenerationNumber();}
-
+double OptimizerController::getBestValue() const { return mPopulation->getBestValueFound(); }
+int OptimizerController::getGenNum() const { return mPopulation->getGenerationNumber(); }
+int OptimizerController::getPopulationSize() const { return mPopulation->getPopSize(); }
+int OptimizerController::getDimension() const { return mPopulation->getDim(); }
 double OptimizerController::getLowerBound(int dim) const{ return mPopulation->getLowerBound(dim); }
 double OptimizerController::getUpperBound(int dim) const{ return mPopulation->getUpperBound(dim); }
 
@@ -128,4 +153,10 @@ double OptimizerController::getLowerFit(int dim) const
     }
     return lower;
 }
+
+void OptimizerController::removeParameterBox(QWidget *parent)
+{
+    delete mParLayout;
+}
+
 

@@ -18,7 +18,6 @@ public:
         value = 0;
         for(int i = 0 ; i < dim ; ++i)
             value += position[i] * position[i];
-        value = sqrt(value);
     }
 
     static void Rastrigin(int dim, double *position, double &value)

@@ -21,7 +21,9 @@ SOURCES += main.cpp\
     population.cpp \
     particlevpopulation.cpp \
     canonpsopopulation.cpp \
-    constrictionpsopopulation.cpp
+    constrictionpsopopulation.cpp \
+    canonpsocontroller.cpp \
+    constrictionpsocontroller.cpp
 
 HEADERS  += mainwindow.h \
     optimizationFunctions.h \
@@ -31,6 +33,8 @@ HEADERS  += mainwindow.h \
     population.h \
     particlevpopulation.h \
     canonpsopopulation.h \
-    constrictionpsopopulation.h
+    constrictionpsopopulation.h \
+    canonpsocontroller.h \
+    constrictionpsocontroller.h
 
 FORMS    += mainwindow.ui

@@ -24,23 +24,19 @@ void ConstrictionPSOController::setParameterBox(QWidget *parent)
     mPopSpin->setMaximum(9999999);
     mPopSpin->setValue(10);
 
-    mInertiaSpin = new QDoubleSpinBox();
-    mInertiaSpin->setMinimum(0);
-    mInertiaSpin->setMaximum(99);
-    mInertiaSpin->setSingleStep(0.1);
-    mInertiaSpin->setValue(0.7);
-
     mPAccSpin = new QDoubleSpinBox();
     mPAccSpin->setMinimum(0);
     mPAccSpin->setMaximum(99);
-    mPAccSpin->setSingleStep(0.1);
-    mPAccSpin->setValue(2);
+    mPAccSpin->setDecimals(4);
+    mPAccSpin->setSingleStep(0.05);
+    mPAccSpin->setValue(2.05);
 
     mGAccSpin = new QDoubleSpinBox();
     mGAccSpin->setMinimum(0);
     mGAccSpin->setMaximum(99);
-    mGAccSpin->setSingleStep(0.1);
-    mGAccSpin->setValue(2);
+    mGAccSpin->setDecimals(4);
+    mGAccSpin->setSingleStep(0.05);
+    mGAccSpin->setValue(2.05);
 
     QLabel* title = new QLabel("Constrction PSO");
     title->setAlignment(Qt::AlignCenter);

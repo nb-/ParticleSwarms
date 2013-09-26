@@ -6,6 +6,7 @@ OptimizerController::OptimizerController()
     mParLayout(0),
     mDataGraph(0),
     mBestPointGraph(0),
+    mOptimalPointGraph(0),
     mValueGraph(0)
 {
 }
@@ -23,6 +24,7 @@ OptimizerController::~OptimizerController()
 
     delete mParLayout;
     delete mDataGraph;
+    delete mOptimalPointGraph;
     delete mBestPointGraph;
 }
 
@@ -31,6 +33,7 @@ void OptimizerController::plotData(int xDim, int yDim) const
     if(mDataGraph == 0 || mBestPointGraph == 0) return;
 
     mDataGraph->clearData();
+    mOptimalPointGraph->clearData();
     mBestPointGraph->clearData();
 
     double* dataPointer;
@@ -40,6 +43,9 @@ void OptimizerController::plotData(int xDim, int yDim) const
         dataPointer = mPopulation->getPositionPointer(i);
         mDataGraph->addData( dataPointer[xDim], dataPointer[yDim] );
     }
+
+    dataPointer = mPopulation->getOptimizationFunction()->getOptimalPoint();
+    mOptimalPointGraph->addData(dataPointer[xDim], dataPointer[yDim]);
 
     dataPointer = mPopulation->getBestPositionFoundPointer();
     mBestPointGraph->addData( dataPointer[xDim], dataPointer[yDim] );
@@ -65,7 +71,14 @@ void OptimizerController::initGraphs(QCustomPlot* plot, QCustomPlot* graph)
     mBestPointGraph->setLineStyle( QCPGraph::lsNone );
     mBestPointGraph->setScatterStyle( QCP::ssCross );
     mBestPointGraph->setScatterSize(7);
-    mBestPointGraph->setPen( QPen( QBrush(QColor("red")), 3 ));
+    mBestPointGraph->setPen( QPen( QBrush(QColor("red")), 2 ));
+
+    if(mOptimalPointGraph==0) mOptimalPointGraph = plot->addGraph();
+    mOptimalPointGraph->clearData();
+    mOptimalPointGraph->setLineStyle( QCPGraph::lsNone );
+    mOptimalPointGraph->setScatterStyle( QCP::ssPlusCircle );
+    mOptimalPointGraph->setScatterSize(10);
+    mOptimalPointGraph->setPen( QPen( QBrush(QColor("green")), 2 ));
 
     if(mValueGraph==0) mValueGraph = graph->addGraph();
     mValueGraph->clearData();
@@ -77,9 +90,11 @@ void OptimizerController::initGraphs(QCustomPlot* plot, QCustomPlot* graph)
 
 void OptimizerController::removeGraphs(QCustomPlot *plot, QCustomPlot* graph)
 {
-    plot->removeGraph(mDataGraph);
+    plot->removeGraph(mDataGraph);//remove should free data?
     plot->removeGraph(mBestPointGraph);
+    plot->removeGraph(mOptimalPointGraph);
     graph->removeGraph(mValueGraph);
+    mOptimalPointGraph = 0;
     mDataGraph = 0;
     mBestPointGraph = 0;
     mValueGraph = 0;

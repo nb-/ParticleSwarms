@@ -37,18 +37,21 @@ void CanonPSOController::setParameterBox(QWidget *parent)
     mInertiaSpin->setMinimum(0);
     mInertiaSpin->setMaximum(99);
     mInertiaSpin->setSingleStep(0.1);
+    mInertiaSpin->setDecimals(4);
     mInertiaSpin->setValue(0.7);
 
     mPAccSpin = new QDoubleSpinBox();
     mPAccSpin->setMinimum(0);
     mPAccSpin->setMaximum(99);
     mPAccSpin->setSingleStep(0.1);
+    mPAccSpin->setDecimals(4);
     mPAccSpin->setValue(1);
 
     mGAccSpin = new QDoubleSpinBox();
     mGAccSpin->setMinimum(0);
     mGAccSpin->setMaximum(99);
     mGAccSpin->setSingleStep(0.1);
+    mGAccSpin->setDecimals(4);
     mGAccSpin->setValue(1);
 
     QLabel* title = new QLabel("Canonical PSO");

@@ -18,6 +18,7 @@ protected:
 
     QCPGraph* mDataGraph;
     QCPGraph* mBestPointGraph;
+    QCPGraph* mOptimalPointGraph;
     QCPGraph* mValueGraph;
 
     QGridLayout* mParLayout;

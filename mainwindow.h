@@ -29,8 +29,15 @@ private:
     int mDim;
     QDoubleSpinBox** mUpperBoundSpins;
     QVBoxLayout* mUpperBoundLayout;
+
     QDoubleSpinBox** mLowerBoundSpins;
     QVBoxLayout* mLowerBoundLayout;
+
+    QDoubleSpinBox** mScaleSpins;
+    QVBoxLayout* mScaleLayout;
+
+    QDoubleSpinBox** mTranslateSpins;
+    QVBoxLayout* mTranslateLayout;
 
     void createOptimizer(QString optName);
     void createOptFunc();
@@ -41,9 +48,11 @@ public:
     void initPlot();
     void plotData();
 
+    void clearButtonPressed();
     void updateGraphScale();
 
     void optComboChanged();
+    void functionComboChanged();
     void dimSpinChanged();
 
     void stepButtonPressed();

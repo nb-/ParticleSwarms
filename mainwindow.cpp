@@ -18,6 +18,11 @@ MainWindow::MainWindow(QWidget *parent) :
     mUpperBoundSpins(0),
     mUpperBoundLayout(0),
     mLowerBoundSpins(0),
+    mLowerBoundLayout(0),
+    mScaleSpins(0),
+    mScaleLayout(0),
+    mTranslateSpins(0),
+    mTranslateLayout(0),
     mDim(2)
 {
     ui->setupUi(this);
@@ -27,12 +32,16 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->optimizerCombo->addItem("Constriction Coefficient PSO", "constriction");
 
     ui->functionCombo->addItem("Sphere Function", "sphere");
-    ui->functionCombo->addItem("Rastrigin Function", "rastrigin");
+    ui->functionCombo->addItem("Generalized Rastrigin Function", "gRastrigin");
+    ui->functionCombo->addItem("Rosenbrock Function", "rosenbrock");
+    ui->functionCombo->addItem("Beale's Function", "beal");
+    ui->functionCombo->addItem("Goldstein-Price Function", "gp");
 
     QObject::connect(ui->stepButton, &QAbstractButton::clicked, this, &MainWindow::stepButtonPressed);
     QObject::connect(ui->initButton, &QAbstractButton::clicked, this, &MainWindow::initButtonPressed);
     QObject::connect(ui->zoomBoundsButton, &QAbstractButton::clicked, this, &MainWindow::zoomBoundsButtonPressed);
     QObject::connect(ui->zoomFitButton, &QAbstractButton::clicked, this, &MainWindow::zoomFitButtonPressed);
+    QObject::connect(ui->clearOutputButton, &QAbstractButton::clicked, this, &MainWindow::clearButtonPressed);
 
     QObject::connect(ui->runForButton, &QAbstractButton::clicked, this, &MainWindow::runForButtonPressed);
 
@@ -46,6 +55,11 @@ MainWindow::MainWindow(QWidget *parent) :
             this,
             &MainWindow::optComboChanged);
 
+    QObject::connect(ui->functionCombo,
+            static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
+            this,
+            &MainWindow::functionComboChanged);
+
     QObject::connect(ui->dimSpin, &QAbstractSpinBox::editingFinished, this, &MainWindow::dimSpinChanged);
 
 
@@ -54,6 +68,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     mUpperBoundLayout = new QVBoxLayout(ui->upperBoundsScroll);
     mLowerBoundLayout = new QVBoxLayout(ui->lowerBoundsScroll);
+    mScaleLayout = new QVBoxLayout(ui->scaleScroll);
+    mTranslateLayout = new QVBoxLayout(ui->translateScroll);
 
     optComboChanged();
     dimSpinChanged();
@@ -108,16 +124,71 @@ void MainWindow::createOptFunc()
         bounds[i + dim] = mUpperBoundSpins[i]->value();
     }
 
-    if( QString::compare( optFuncName, "sphere") )
+    bool applyScale = false;
+    for(int i = 0 ; i < dim ; ++i)
     {
-        mOptFunc = new SphereFunction(dim, bounds);
+        if(mScaleSpins[i]->value() != 1)
+        {
+            applyScale = true;
+            break;
+        }
     }
-    else if( QString::compare( optFuncName, "rastrigin") )
+    double* scale = 0;
+    if(applyScale)
     {
-        mOptFunc = new RastriginFunction(dim, bounds);
+        scale = new double[dim];
+        for(int i = 0 ; i < dim ; ++i)
+        {
+            scale[i] = mScaleSpins[i]->value();
+        }
     }
 
+    bool applyTranslation = false;              //pass null pointer if no scaling needed
+    for(int i = 0 ; i < dim ; ++i)
+    {
+        if(mTranslateSpins[i]->value() != 0)
+        {
+            applyTranslation = true;
+            break;
+        }
+    }
+    double* translation = 0;                    //pass null pointer if no translation needed
+    if(applyTranslation)
+    {
+        translation = new double[dim];
+        for(int i = 0 ; i < dim ; ++i)
+        {
+            translation[i] = mTranslateSpins[i]->value();
+        }
+    }
+
+    if( QString::compare( optFuncName, "sphere") == 0 )
+    {
+        mOptFunc = new SphereFunction(dim, bounds, translation, scale);
+    }
+    else if( QString::compare( optFuncName, "gRastrigin") == 0 )
+    {
+        mOptFunc = new GeneralizedRastriginFunction(dim, bounds, translation, scale);
+    }
+    else if( QString::compare( optFuncName, "rosenbrock") == 0 )
+    {
+        mOptFunc = new RosenbrockFunction(bounds, translation, scale);
+    }
+    else if( QString::compare( optFuncName, "beal") == 0 )
+    {
+        mOptFunc = new BealesFunction(bounds,translation,scale);
+    }
+    else if( QString::compare( optFuncName, "gp") == 0 )
+    {
+        mOptFunc = new GoldsteinPriceFunction(bounds, translation, scale);
+    }
+    else
+    {
+        mOptFunc = 0;
+    }
 }
+
+
 
 void MainWindow::initPlot()
 {
@@ -153,6 +224,11 @@ void MainWindow::plotData()
     ui->graph->replot();
 }
 
+void MainWindow::clearButtonPressed()
+{
+    ui->textEdit->clear();
+}
+
 void MainWindow::updateGraphScale()
 {
     if(ui->logCheckBox->checkState() == Qt::Checked)
@@ -170,17 +246,89 @@ void MainWindow::optComboChanged()
     createOptimizer(what);//TODO: add protection from seqfault caused by changing combo box then not initializing afterwards
 }
 
+void MainWindow::functionComboChanged()
+{
+    QString optFuncName = ui->functionCombo->itemData(ui->functionCombo->currentIndex()).toString();
+
+    //Set input constraints
+    //todo: make this better somehow
+
+
+    if( QString::compare( optFuncName, "sphere") == 0 )
+    {
+         ui->dimSpin->setEnabled(true);
+    }
+    else if( QString::compare( optFuncName, "gRastrigin") == 0 )
+    {
+         ui->dimSpin->setEnabled(true);
+    }
+    else if( QString::compare( optFuncName, "rosenbrock") == 0 )
+    {
+        ui->dimSpin->setEnabled(false);
+        ui->dimSpin->setValue(2);
+    }
+    else if( QString::compare( optFuncName, "beale") == 0 )
+    {
+        ui->dimSpin->setEnabled(false);
+        ui->dimSpin->setValue(2);
+    }
+    else if( QString::compare( optFuncName, "gp") == 0 )
+    {
+        ui->dimSpin->setEnabled(false);
+        ui->dimSpin->setValue(2);
+    }
+    else
+    {
+        ui->dimSpin->setEnabled(true);
+    }
+    dimSpinChanged();
+}
+
 void MainWindow::dimSpinChanged()
 {
     int dim = ui->dimSpin->value();
     if(dim < 2) return;
+
+    double* defaultBounds = 0;
+
+    QString optFuncName = ui->functionCombo->itemData(ui->functionCombo->currentIndex()).toString();
+
+    if( QString::compare( optFuncName, "sphere") == 0 )
+    {
+         defaultBounds = SphereFunction::getDefaultBounds(dim);
+    }
+    else if( QString::compare( optFuncName, "gRastrigin") == 0 )
+    {
+         defaultBounds = GeneralizedRastriginFunction::getDefaultBounds(dim);
+    }
+    else if( QString::compare( optFuncName, "rosenbrock") == 0 )
+    {
+        defaultBounds = RosenbrockFunction::getDefaultBounds(dim);
+    }
+    else if( QString::compare( optFuncName, "beale") == 0 )
+    {
+        defaultBounds = BealesFunction::getDefaultBounds(dim);
+    }
+    else if( QString::compare( optFuncName, "rosenbrock") == 0 )
+    {
+        defaultBounds = GoldsteinPriceFunction::getDefaultBounds(dim);
+    }
+    else
+    {
+        defaultBounds = new double[dim*2];
+        for(int i = 0 ; i < dim ; ++i)
+        {
+            defaultBounds[i] = -10;
+            defaultBounds[i + dim] = 10;
+        }
+    }
 
     if(mUpperBoundSpins != 0)
     {
         for(int i = 0 ; i < mDim ; ++i)
             delete mUpperBoundSpins[i];
 
-        delete[] mUpperBoundSpins;//pointers held will have been deleted already
+        delete[] mUpperBoundSpins;
     }
 
     mUpperBoundSpins = new QDoubleSpinBox*[dim];
@@ -189,7 +337,7 @@ void MainWindow::dimSpinChanged()
         mUpperBoundSpins[i] = new QDoubleSpinBox();
         mUpperBoundSpins[i]->setMaximum(9999999);
         mUpperBoundSpins[i]->setMinimum(-9999999);
-        mUpperBoundSpins[i]->setValue(100);
+        mUpperBoundSpins[i]->setValue(defaultBounds[i + dim]);
         mUpperBoundLayout->addWidget(mUpperBoundSpins[i]);
     }
 
@@ -198,7 +346,7 @@ void MainWindow::dimSpinChanged()
         for(int i = 0 ; i < mDim ; ++i)
             delete mLowerBoundSpins[i];
 
-        delete[] mLowerBoundSpins;//pointers held will have been deleted already
+        delete[] mLowerBoundSpins;
     }
 
     mLowerBoundSpins = new QDoubleSpinBox*[dim];
@@ -207,10 +355,49 @@ void MainWindow::dimSpinChanged()
         mLowerBoundSpins[i] = new QDoubleSpinBox();
         mLowerBoundSpins[i]->setMaximum(9999999);
         mLowerBoundSpins[i]->setMinimum(-9999999);
-        mLowerBoundSpins[i]->setValue(-100);
+        mLowerBoundSpins[i]->setValue(defaultBounds[i]);
         mLowerBoundLayout->addWidget(mLowerBoundSpins[i]);
     }
 
+    delete[] defaultBounds;
+
+    if(mScaleSpins != 0)
+    {
+        for(int i = 0 ; i < mDim ; ++i)
+            delete mScaleSpins[i];
+
+        delete[] mScaleSpins;
+    }
+
+    mScaleSpins = new QDoubleSpinBox*[dim];
+    for(int i = 0 ; i < dim ; ++i)
+    {
+        mScaleSpins[i] = new QDoubleSpinBox();
+        mScaleSpins[i]->setMaximum(9999999);
+        mScaleSpins[i]->setMinimum(0.0001);
+        mScaleSpins[i]->setValue(1);
+        mScaleSpins[i]->setSingleStep(0.1);
+        mScaleLayout->addWidget(mScaleSpins[i]);
+    }
+
+    if(mTranslateSpins != 0)
+    {
+        for(int i = 0 ; i < mDim ; ++i)
+            delete mTranslateSpins[i];
+
+        delete[] mTranslateSpins;
+    }
+
+    mTranslateSpins = new QDoubleSpinBox*[dim];
+    for(int i = 0 ; i < dim ; ++i)
+    {
+        mTranslateSpins[i] = new QDoubleSpinBox();
+        mTranslateSpins[i]->setMaximum(9999999);
+        mTranslateSpins[i]->setMinimum(-999999);
+        mTranslateSpins[i]->setValue(0);
+        mTranslateSpins[i]->setSingleStep(1);
+        mTranslateLayout->addWidget(mTranslateSpins[i]);
+    }
 
     mDim = dim;
 }
@@ -269,6 +456,34 @@ void MainWindow::zoomFitButtonPressed()
 
 MainWindow::~MainWindow()
 {
+    if(mUpperBoundSpins != 0)
+    {
+        for(int i = 0 ; i < mDim ; ++i)
+            delete mUpperBoundSpins[i];
+
+        delete[] mUpperBoundSpins;
+    }
+    if(mLowerBoundSpins != 0)
+    {
+        for(int i = 0 ; i < mDim ; ++i)
+            delete mLowerBoundSpins[i];
+
+        delete[] mLowerBoundSpins;
+    }
+    if(mScaleSpins != 0)
+    {
+        for(int i = 0 ; i < mDim ; ++i)
+            delete mScaleSpins[i];
+
+        delete[] mScaleSpins;
+    }
+    if(mTranslateSpins != 0)
+    {
+        for(int i = 0 ; i < mDim ; ++i)
+            delete mTranslateSpins[i];
+
+        delete[] mTranslateSpins;
+    }
     if(mOptimizer != 0) mOptimizer->removeGraphs(ui->plot, ui->graph);
     delete mOptimizer;
     delete qout;

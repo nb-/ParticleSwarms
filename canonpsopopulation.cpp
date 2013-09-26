@@ -1,8 +1,8 @@
 #include "canonpsopopulation.h"
 #include <stdlib.h>
 
-CanonPSOPopulation::CanonPSOPopulation(int size, int dim, double inertia, double pAccel, double gAccel, void (*optFunc)(int dim, double *position, double &value), double *bounds)
-   :ParticleVPopulation(size,dim, optFunc, bounds)
+CanonPSOPopulation::CanonPSOPopulation(int size, double inertia, double pAccel, double gAccel, OptimizationFunction *optFunc)
+   :ParticleVPopulation(size, optFunc)
 {
     mInertia = inertia;
     mPAccel = pAccel;

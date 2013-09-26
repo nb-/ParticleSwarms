@@ -17,7 +17,7 @@ protected:
     void setConstrictionCoef();
 
 public:
-    ConstrictionPSOPopulation(int size, int dim, double pAccel, double gAccel, void (*optFunc)(int dim, double *position, double &value), double *bounds);
+    ConstrictionPSOPopulation(int size, double pAccel, double gAccel, OptimizationFunction *optFunc);
     virtual ~ConstrictionPSOPopulation();
 
     double getConstrictionCoef() const;

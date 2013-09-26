@@ -3,8 +3,11 @@
 
 #include <QMainWindow>
 
+#include "optimizationFunctions.h"
 #include "optimizercontroller.h"
 #include "QDebugStream.h"
+#include <QDoubleSpinBox>
+#include <QVBoxLayout>
 
 namespace Ui {
 class MainWindow;
@@ -19,10 +22,18 @@ class MainWindow : public QMainWindow
 private:
     Ui::MainWindow *ui;
     OptimizerController* mOptimizer;
+    OptimizationFunction* mOptFunc;
 
     QDebugStream* qout;
 
+    int mDim;
+    QDoubleSpinBox** mUpperBoundSpins;
+    QVBoxLayout* mUpperBoundLayout;
+    QDoubleSpinBox** mLowerBoundSpins;
+    QVBoxLayout* mLowerBoundLayout;
+
     void createOptimizer(QString optName);
+    void createOptFunc();
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
@@ -33,6 +44,7 @@ public:
     void updateGraphScale();
 
     void optComboChanged();
+    void dimSpinChanged();
 
     void stepButtonPressed();
     void runForButtonPressed();

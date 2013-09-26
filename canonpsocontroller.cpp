@@ -5,7 +5,6 @@
 CanonPSOController::CanonPSOController()
    :OptimizerController(),
     mPopSpin(0),
-    mDimSpin(0),
     mPAccSpin(0),
     mGAccSpin(0)
 {
@@ -14,8 +13,6 @@ CanonPSOController::CanonPSOController()
 CanonPSOController::~CanonPSOController()
 {
     delete mPopSpin;
-    delete mDimSpin;
-    delete mInertiaSpin;
     delete mPAccSpin;
     delete mGAccSpin;
 }
@@ -35,10 +32,6 @@ void CanonPSOController::setParameterBox(QWidget *parent)
     mPopSpin->setMinimum(2);
     mPopSpin->setMaximum(9999999);
     mPopSpin->setValue(10);
-
-    mDimSpin = new QSpinBox();
-    mDimSpin->setMinimum(2);
-    mDimSpin->setMaximum(9999999);
 
     mInertiaSpin = new QDoubleSpinBox();
     mInertiaSpin->setMinimum(0);
@@ -65,35 +58,30 @@ void CanonPSOController::setParameterBox(QWidget *parent)
     mParLayout->addWidget(new QLabel("Pop Size: "),     1,0,1,1);
     mParLayout->addWidget( mPopSpin,                    1,1,1,1);
 
-    mParLayout->addWidget(new QLabel("Dimension: "),    2,0,1,1);
-    mParLayout->addWidget( mDimSpin,                    2,1,1,1);
+    mParLayout->addWidget(new QLabel("Inertia: "),      2,0,1,1);
+    mParLayout->addWidget( mInertiaSpin,                2,1,1,1);
 
-    mParLayout->addWidget(new QLabel("Inertia: "),      3,0,1,1);
-    mParLayout->addWidget( mInertiaSpin,                3,1,1,1);
+    mParLayout->addWidget(new QLabel("PBest Accel: "),  3,0,1,1);
+    mParLayout->addWidget( mPAccSpin,                   3,1,1,1);
 
-    mParLayout->addWidget(new QLabel("PBest Accel: "),  4,0,1,1);
-    mParLayout->addWidget( mPAccSpin,                   4,1,1,1);
-
-    mParLayout->addWidget(new QLabel("GBest Accel: "),  5,0,1,1);
-    mParLayout->addWidget( mGAccSpin,                   5,1,1,1);
+    mParLayout->addWidget(new QLabel("GBest Accel: "),  4,0,1,1);
+    mParLayout->addWidget( mGAccSpin,                   4,1,1,1);
 
 }
 
-void CanonPSOController::initializeOptimizer()
+void CanonPSOController::initializeOptimizer(OptimizationFunction *optFunc)
 {//todo: add null checks
     if(mPopSpin == 0) return;
+    if(optFunc == 0) return;
+
+    if(mPopulation != 0)
+        delete mPopulation;
 
     int pop = mPopSpin->value();
-    int dim = mDimSpin->value();
     double in = mInertiaSpin->value();
     double pA = mPAccSpin->value();
     double gA = mGAccSpin->value();
-    double* bounds = new double[dim * 2];
-    for(int i = 0 ; i < dim; ++i)
-    {
-        bounds[i] = -10;
-        bounds[i + dim] = 10;
-    }
-    mPopulation = new CanonPSOPopulation(pop, dim, in, pA, gA, &(OptimizationFunctions::Rastrigin), bounds);
+
+    mPopulation = new CanonPSOPopulation(pop, in, pA, gA, optFunc);
     mPopulation->initializePopulation();
 }

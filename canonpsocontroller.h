@@ -13,7 +13,6 @@ class CanonPSOController : public OptimizerController
 protected:
 
     QSpinBox* mPopSpin;
-    QSpinBox* mDimSpin;
     QDoubleSpinBox* mInertiaSpin;
     QDoubleSpinBox* mPAccSpin;
     QDoubleSpinBox* mGAccSpin;
@@ -23,7 +22,7 @@ public:
     virtual ~CanonPSOController();
 
     virtual void setParameterBox(QWidget* parent);
-    virtual void initializeOptimizer();
+    virtual void initializeOptimizer(OptimizationFunction* optFunc);
 };
 
 #endif // CANONPSOCONTROLLER_H

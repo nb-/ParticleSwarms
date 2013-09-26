@@ -12,7 +12,7 @@ class ParticleVPopulation : public Population
 protected:
     double* mVelocities;
 public:
-    ParticleVPopulation(int size, int dim, void (*optFunc)(int dim, double *position, double &value), double *bounds);
+    ParticleVPopulation(int size, OptimizationFunction *optFunc);
     virtual ~ParticleVPopulation();
 
     double* getVelocityPointer(int individualIndex) const;

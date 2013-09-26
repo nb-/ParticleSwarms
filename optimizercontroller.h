@@ -4,6 +4,7 @@
 #include "population.h"
 #include "qcustomplot.h"
 #include <QGridLayout>
+#include "optimizationFunctions.h"
 
 
 //==================================================================
@@ -31,7 +32,9 @@ public:
     int getPopulationSize() const;
     int getDimension() const;
 
-    void initializePopulation();
+
+
+    void initializePopulation(OptimizationFunction *optFunc);
     void step();
     void runFor(int iterations, bool graph);
 
@@ -49,7 +52,7 @@ public:
 
     virtual void setParameterBox(QWidget* parent) = 0;
     void removeParameterBox(QWidget* parent);
-    virtual void initializeOptimizer() = 0;
+    virtual void initializeOptimizer(OptimizationFunction* optFunc) = 0;
 };
 
 #endif // OPTIMIZERCONTROLLER_H

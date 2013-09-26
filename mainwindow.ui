@@ -20,7 +20,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_4" stretch="1,0,0,0">
+         <layout class="QVBoxLayout" name="verticalLayout_4" stretch="1,0,0,0,0">
           <item>
            <widget class="QCustomPlot" name="plot" native="true"/>
           </item>
@@ -83,7 +83,17 @@
            </layout>
           </item>
           <item>
+           <widget class="QComboBox" name="functionCombo"/>
+          </item>
+          <item>
            <layout class="QHBoxLayout" name="horizontalLayout_8">
+            <item>
+             <widget class="QComboBox" name="optimizerCombo"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="1,1,1,0,0">
             <item>
              <widget class="QPushButton" name="initButton">
               <property name="text">
@@ -91,13 +101,6 @@
               </property>
              </widget>
             </item>
-            <item>
-             <widget class="QComboBox" name="optimizerCombo"/>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="1,1,0,0">
             <item>
              <widget class="QPushButton" name="stepButton">
               <property name="text">
@@ -140,9 +143,209 @@
          </layout>
         </item>
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1,1">
+         <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1,0,0">
           <item>
            <widget class="QCustomPlot" name="graph" native="true"/>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetNoConstraint</enum>
+            </property>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0,1">
+              <item>
+               <widget class="QLabel" name="label">
+                <property name="text">
+                 <string>Dimensions: </string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="dimSpin">
+                <property name="minimum">
+                 <number>2</number>
+                </property>
+                <property name="maximum">
+                 <number>999999999</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QGridLayout" name="gridLayout_2">
+              <item row="0" column="4">
+               <widget class="QLabel" name="label_5">
+                <property name="text">
+                 <string>- Scale -</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLabel" name="label_6">
+                <property name="text">
+                 <string>- Lower Bounds -</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="4">
+               <widget class="QScrollArea" name="scrollArea_5">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="horizontalScrollBarPolicy">
+                 <enum>Qt::ScrollBarAlwaysOff</enum>
+                </property>
+                <property name="widgetResizable">
+                 <bool>true</bool>
+                </property>
+                <widget class="QWidget" name="scaleScroll">
+                 <property name="geometry">
+                  <rect>
+                   <x>0</x>
+                   <y>0</y>
+                   <width>151</width>
+                   <height>69</height>
+                  </rect>
+                 </property>
+                </widget>
+               </widget>
+              </item>
+              <item row="1" column="3">
+               <widget class="QScrollArea" name="scrollArea_4">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="verticalScrollBarPolicy">
+                 <enum>Qt::ScrollBarAsNeeded</enum>
+                </property>
+                <property name="horizontalScrollBarPolicy">
+                 <enum>Qt::ScrollBarAlwaysOff</enum>
+                </property>
+                <property name="widgetResizable">
+                 <bool>true</bool>
+                </property>
+                <widget class="QWidget" name="translateScroll">
+                 <property name="geometry">
+                  <rect>
+                   <x>0</x>
+                   <y>0</y>
+                   <width>151</width>
+                   <height>69</height>
+                  </rect>
+                 </property>
+                </widget>
+               </widget>
+              </item>
+              <item row="0" column="3">
+               <widget class="QLabel" name="label_4">
+                <property name="text">
+                 <string>- Translate -</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QScrollArea" name="scrollArea_3">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="verticalScrollBarPolicy">
+                 <enum>Qt::ScrollBarAsNeeded</enum>
+                </property>
+                <property name="horizontalScrollBarPolicy">
+                 <enum>Qt::ScrollBarAlwaysOff</enum>
+                </property>
+                <property name="widgetResizable">
+                 <bool>true</bool>
+                </property>
+                <widget class="QWidget" name="lowerBoundsScroll">
+                 <property name="geometry">
+                  <rect>
+                   <x>0</x>
+                   <y>0</y>
+                   <width>151</width>
+                   <height>69</height>
+                  </rect>
+                 </property>
+                </widget>
+               </widget>
+              </item>
+              <item row="1" column="2">
+               <widget class="QScrollArea" name="scrollArea_2">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="verticalScrollBarPolicy">
+                 <enum>Qt::ScrollBarAlwaysOn</enum>
+                </property>
+                <property name="horizontalScrollBarPolicy">
+                 <enum>Qt::ScrollBarAlwaysOff</enum>
+                </property>
+                <property name="widgetResizable">
+                 <bool>true</bool>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+                </property>
+                <widget class="QWidget" name="upperBoundsScroll">
+                 <property name="geometry">
+                  <rect>
+                   <x>0</x>
+                   <y>0</y>
+                   <width>134</width>
+                   <height>69</height>
+                  </rect>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                </widget>
+               </widget>
+              </item>
+              <item row="0" column="2">
+               <widget class="QLabel" name="label_2">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>- Upper Bounds -</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
           </item>
           <item>
            <widget class="QScrollArea" name="scrollArea">
@@ -155,7 +358,7 @@
                <x>0</x>
                <y>0</y>
                <width>632</width>
-               <height>345</height>
+               <height>69</height>
               </rect>
              </property>
             </widget>

@@ -1,31 +1,22 @@
 #include "population.h"
 #include <stdlib.h>
 
-Population::Population(int size, int dim, void (*optFunc)(int dim, double *position, double &value), double *bounds)
-   :mSize(size),
-    mDim(dim)//,
-    //mBounds(bounds),
-    //mPointIndices(new int[mSize]),
-    //mValues(new double[mSize]),
-    //mPositions(new double[mSize * mDim]),
-   // mPrevBestValues(new double[mSize]),
-    //mPrevBestPositions(new double[mSize * mDim]),
-    //mOptFunction(optFunc),
-    //mBestPointIndex(0)
+Population::Population(int size, OptimizationFunction *optFunc)
+   :mSize(size)
 {
     mGenNum = 0;
-    mBounds = bounds;
+    mOptFunc = optFunc; // Population does NOT manage opt function memory! do not delete
+    mBounds = optFunc->getBounds(); //Population does NOT manage bounds memory!
+    mDim = optFunc->getDim();
     mValues = new double[mSize];
     mPositions=new double[mSize * mDim];
     mPrevBestValues=new double[mSize];
     mPrevBestPositions=new double[mSize * mDim];
-    mOptFunction=optFunc;
     mBestPointIndex=0;
 }
 
 Population::~Population()
 {
-    delete[] mBounds;
     delete[] mPositions;
     delete[] mPrevBestPositions;
     delete[] mValues;
@@ -57,7 +48,7 @@ void Population::evaluatePopulation()
     int maxIt;
 
     for(int i = 0 ; i < mSize ; ++i)
-        mOptFunction(mDim, &(mPositions[i * mDim]), mValues[i]);
+        mOptFunc->evaluate(&(mPositions[i * mDim]), mValues[i]);
 
     for(int i = 0 ; i < mSize ; ++i)
     {
@@ -110,6 +101,8 @@ int Population::getPopSize() const { return mSize; }
 int Population::getDim() const { return mDim; }
 
 int Population::getGenerationNumber() const { return mGenNum; }
+
+OptimizationFunction *Population::getOptimizationFunction() const { return mOptFunc; }
 
 int Population::getBestIndividualIndex() const { return mBestPointIndex; }
 double Population::getBestValueFound() const { return mPrevBestValues[mBestPointIndex]; }

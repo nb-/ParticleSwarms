@@ -15,7 +15,7 @@ protected:
     double mGAccel;
 
 public:
-    CanonPSOPopulation(int size, int dim, double inertia, double pAccel, double gAccel, void (*optFunc)(int dim, double *position, double &value), double *bounds);
+    CanonPSOPopulation(int size, double inertia, double pAccel, double gAccel, OptimizationFunction *optFunc);
     virtual ~CanonPSOPopulation();
 
     double getInertia() const;

@@ -1,6 +1,8 @@
 #ifndef POPULATION_H
 #define POPULATION_H
 
+#include "optimizationFunctions.h"
+
 //==================================================================
 //    Base Class for Population Based BB Optimizer | Abstract
 //==================================================================
@@ -12,12 +14,13 @@ class Population
 protected:
 
     const int mSize;
-    const int mDim;
+    int mDim;
+
+    OptimizationFunction* mOptFunc;
 
     int mGenNum;
 
     int mBestPointIndex;
-
     double* mBounds;
     double* mValues;
     double* mPositions;
@@ -26,14 +29,14 @@ protected:
 
 
 public:
-    void (*mOptFunction)(int dim, double *position, double &value);
-
-    Population(int size, int dim, void (*optFunc)(int dim, double *position, double &value), double* bounds);
+    Population(int size, OptimizationFunction* optFunc);
     virtual ~Population();
 
     int getPopSize() const;
     int getDim() const;
     int getGenerationNumber() const;
+
+    OptimizationFunction* getOptimizationFunction() const;
 
     int     getBestIndividualIndex() const;
     double  getBestValueFound() const;

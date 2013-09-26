@@ -1,8 +1,8 @@
 #include "particlevpopulation.h"
 #include <stdlib.h>
 
-ParticleVPopulation::ParticleVPopulation(int size, int dim, void (*optFunc)(int dim, double *position, double &value), double *bounds)
-   :Population(size,dim, optFunc, bounds)
+ParticleVPopulation::ParticleVPopulation(int size, OptimizationFunction *optFunc)
+   :Population(size, optFunc)
 {
     mVelocities = new double[mSize * mDim];
 }

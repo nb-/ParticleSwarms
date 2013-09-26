@@ -14,7 +14,7 @@ OptimizerController::~OptimizerController()
 {
     delete mPopulation;
 
-    foreach (QObject *object, mParLayout->parent()->children()) {
+    foreach (QObject *object, mParLayout->parent()->children()) {//hack to get it to work, fix maybe
       QWidget *widget = qobject_cast<QWidget*>(object);
       if (widget) {
         delete widget;
@@ -83,11 +83,6 @@ void OptimizerController::removeGraphs(QCustomPlot *plot, QCustomPlot* graph)
     mDataGraph = 0;
     mBestPointGraph = 0;
     mValueGraph = 0;
-}
-
-void OptimizerController::initializePopulation()
-{
-    mPopulation->initializePopulation();
 }
 
 void OptimizerController::step()

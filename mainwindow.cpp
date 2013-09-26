@@ -13,13 +13,21 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    mOptimizer(0)
+    mOptimizer(0),
+    mOptFunc(0),
+    mUpperBoundSpins(0),
+    mUpperBoundLayout(0),
+    mLowerBoundSpins(0),
+    mDim(2)
 {
     ui->setupUi(this);
     srand(QDateTime::currentMSecsSinceEpoch());
 
     ui->optimizerCombo->addItem("Canonical PSO", "canon");
     ui->optimizerCombo->addItem("Constriction Coefficient PSO", "constriction");
+
+    ui->functionCombo->addItem("Sphere Function", "sphere");
+    ui->functionCombo->addItem("Rastrigin Function", "rastrigin");
 
     QObject::connect(ui->stepButton, &QAbstractButton::clicked, this, &MainWindow::stepButtonPressed);
     QObject::connect(ui->initButton, &QAbstractButton::clicked, this, &MainWindow::initButtonPressed);
@@ -38,12 +46,18 @@ MainWindow::MainWindow(QWidget *parent) :
             this,
             &MainWindow::optComboChanged);
 
+    QObject::connect(ui->dimSpin, &QAbstractSpinBox::editingFinished, this, &MainWindow::dimSpinChanged);
+
 
     qout = new QDebugStream(std::cout, ui->textEdit);  
 
 
+    mUpperBoundLayout = new QVBoxLayout(ui->upperBoundsScroll);
+    mLowerBoundLayout = new QVBoxLayout(ui->lowerBoundsScroll);
 
     optComboChanged();
+    dimSpinChanged();
+    createOptFunc();
 }
 
 void MainWindow::createOptimizer(QString optName)
@@ -72,9 +86,36 @@ void MainWindow::createOptimizer(QString optName)
         return;
     }
 
-
-
     mOptimizer->setParameterBox(ui->parameterContainer);
+
+}
+
+void MainWindow::createOptFunc()
+{
+
+    if(mOptFunc!=0) delete mOptFunc;    //todo make this more safe if optimizer is not guaranteed to be initializing
+    mOptFunc = 0;
+
+    QString optFuncName = ui->functionCombo->itemData(ui->functionCombo->currentIndex()).toString();
+
+    int dim = ui->dimSpin->value();
+
+    double* bounds = new double[dim*2];
+
+    for(int i = 0 ; i < dim ; ++i)
+    {
+        bounds[i] = mLowerBoundSpins[i]->value();
+        bounds[i + dim] = mUpperBoundSpins[i]->value();
+    }
+
+    if( QString::compare( optFuncName, "sphere") )
+    {
+        mOptFunc = new SphereFunction(dim, bounds);
+    }
+    else if( QString::compare( optFuncName, "rastrigin") )
+    {
+        mOptFunc = new RastriginFunction(dim, bounds);
+    }
 
 }
 
@@ -126,7 +167,52 @@ void MainWindow::updateGraphScale()
 void MainWindow::optComboChanged()
 {
     QString what = ui->optimizerCombo->itemData(ui->optimizerCombo->currentIndex()).toString();
-    createOptimizer(what);
+    createOptimizer(what);//TODO: add protection from seqfault caused by changing combo box then not initializing afterwards
+}
+
+void MainWindow::dimSpinChanged()
+{
+    int dim = ui->dimSpin->value();
+    if(dim < 2) return;
+
+    if(mUpperBoundSpins != 0)
+    {
+        for(int i = 0 ; i < mDim ; ++i)
+            delete mUpperBoundSpins[i];
+
+        delete[] mUpperBoundSpins;//pointers held will have been deleted already
+    }
+
+    mUpperBoundSpins = new QDoubleSpinBox*[dim];
+    for(int i = 0 ; i < dim ; ++i)
+    {
+        mUpperBoundSpins[i] = new QDoubleSpinBox();
+        mUpperBoundSpins[i]->setMaximum(9999999);
+        mUpperBoundSpins[i]->setMinimum(-9999999);
+        mUpperBoundSpins[i]->setValue(100);
+        mUpperBoundLayout->addWidget(mUpperBoundSpins[i]);
+    }
+
+    if(mLowerBoundSpins != 0)
+    {
+        for(int i = 0 ; i < mDim ; ++i)
+            delete mLowerBoundSpins[i];
+
+        delete[] mLowerBoundSpins;//pointers held will have been deleted already
+    }
+
+    mLowerBoundSpins = new QDoubleSpinBox*[dim];
+    for(int i = 0 ; i < dim ; ++i)
+    {
+        mLowerBoundSpins[i] = new QDoubleSpinBox();
+        mLowerBoundSpins[i]->setMaximum(9999999);
+        mLowerBoundSpins[i]->setMinimum(-9999999);
+        mLowerBoundSpins[i]->setValue(-100);
+        mLowerBoundLayout->addWidget(mLowerBoundSpins[i]);
+    }
+
+
+    mDim = dim;
 }
 
 void MainWindow::stepButtonPressed()
@@ -149,8 +235,8 @@ void MainWindow::runForButtonPressed()
 void MainWindow::initButtonPressed()
 {
 
-
-    mOptimizer->initializeOptimizer();
+    createOptFunc();
+    mOptimizer->initializeOptimizer(mOptFunc);
     ui->plotXDimSpin->setMaximum(mOptimizer->getDimension() - 1);
     ui->plotYDimSpin->setMaximum(mOptimizer->getDimension() - 1);
     initPlot();

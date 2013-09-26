@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <math.h>
 
-ConstrictionPSOPopulation::ConstrictionPSOPopulation(int size, int dim, double pAccel, double gAccel, void (*optFunc)(int, double *, double &), double *bounds)
-    :ParticleVPopulation(size,dim,optFunc,bounds)
+ConstrictionPSOPopulation::ConstrictionPSOPopulation(int size, double pAccel, double gAccel, OptimizationFunction *optFunc)
+    :ParticleVPopulation(size,optFunc)
 {
     mPAccel = pAccel;
     mGAccel = gAccel;

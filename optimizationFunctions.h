@@ -101,14 +101,16 @@ protected:
 
     double transformInputValue(const int dim, double inputVal)
     {
+
         if(mOffsets != 0)
         {
             inputVal -= mOffsets[dim];  // shifting space by offset means shifting points the other way
         }
         if(mStretch != 0)
         {
-            inputVal *= mStretch[dim];
+            inputVal /= mStretch[dim];
         }
+
         return inputVal;
     }
 };
@@ -250,4 +252,24 @@ public:
 
 };
 
+//class AckleysFunction : public OptimizationFunction
+//{
+//public:
+//    AckleysFunction(double* bounds, double* offsets = 0, double* stretch = 0) : OptimizationFunction(2,bounds,offsets,stretch){}
+
+//    static double* getDefaultBounds(int dim)
+//    {
+//        return new double[4] {-5, -5, 5, 5};
+//    }
+
+//    virtual void evaluate(double *position, double &outValue)
+//    {
+//        outValue = 0;
+//        double tempX = transformInputValue(0,position[0]);
+//        double tempY = transformInputValue(1,position[1]);
+//        outValue =
+
+//    }
+
+//};
 #endif // OPTIMIZATIONFUNCTIONS_H

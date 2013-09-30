@@ -2,7 +2,10 @@
 #include "ui_mainwindow.h"
 #include <iostream>
 #include <QDateTime>
-#include <hash_map>
+#include <stdlib.h>
+#include <vector>
+#include <utility>
+
 
 #include "population.h"
 #include "canonpsopopulation.h"
@@ -23,6 +26,10 @@ MainWindow::MainWindow(QWidget *parent) :
     mScaleLayout(0),
     mTranslateSpins(0),
     mTranslateLayout(0),
+    mVisualize(false),
+    mVisualizeGraphs(0),
+    mVisXYRes(200),
+    mVisZRes(100),
     mDim(2)
 {
     ui->setupUi(this);
@@ -36,6 +43,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->functionCombo->addItem("Rosenbrock Function", "rosenbrock");
     ui->functionCombo->addItem("Beale's Function", "beal");
     ui->functionCombo->addItem("Goldstein-Price Function", "gp");
+    //ui->functionCombo->addItem("Schwefel Function", "schw");
 
     QObject::connect(ui->stepButton, &QAbstractButton::clicked, this, &MainWindow::stepButtonPressed);
     QObject::connect(ui->initButton, &QAbstractButton::clicked, this, &MainWindow::initButtonPressed);
@@ -43,12 +51,15 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->zoomFitButton, &QAbstractButton::clicked, this, &MainWindow::zoomFitButtonPressed);
     QObject::connect(ui->clearOutputButton, &QAbstractButton::clicked, this, &MainWindow::clearButtonPressed);
 
+
     QObject::connect(ui->runForButton, &QAbstractButton::clicked, this, &MainWindow::runForButtonPressed);
 
     QObject::connect(ui->plotXDimSpin, &QAbstractSpinBox::editingFinished, this, &MainWindow::plotData);
     QObject::connect(ui->plotYDimSpin, &QAbstractSpinBox::editingFinished, this, &MainWindow::plotData);
 
     QObject::connect(ui->logCheckBox, &QCheckBox::clicked, this, &MainWindow::updateGraphScale);
+
+    QObject::connect(ui->visCheck, &QCheckBox::clicked, this, &MainWindow::visDataCheckPressed);
 
     QObject::connect(ui->optimizerCombo,
             static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
@@ -71,9 +82,144 @@ MainWindow::MainWindow(QWidget *parent) :
     mScaleLayout = new QVBoxLayout(ui->scaleScroll);
     mTranslateLayout = new QVBoxLayout(ui->translateScroll);
 
+    ui->plot->addLayer("items");
+    ui->plot->addLayer("bkgrnd");
+
     optComboChanged();
     dimSpinChanged();
     createOptFunc();
+}
+
+void MainWindow::initVisGraphs()
+{
+    if(!mVisualize) return;
+    if(mOptFunc == 0) return;
+    if(mVisualizeGraphs != 0)
+    {
+        removeVisGraphs();
+    }
+
+    mVisualizeGraphs = new QCPGraph*[mVisZRes];
+
+    int num = mVisXYRes*mVisXYRes;
+    int xAxis = ui->plotXDimSpin->value();
+    int yAxis = ui->plotYDimSpin->value();
+
+    double xLowBound = mLowerBoundSpins[xAxis]->value(); //cheating, might bug out
+    double xUpBound = mUpperBoundSpins[xAxis]->value();
+    double xPosStep = (xUpBound - xLowBound)/mVisXYRes;
+
+    double yLowBound = mLowerBoundSpins[yAxis]->value();
+    double yUpBound = mUpperBoundSpins[yAxis]->value();
+    double yPosStep = (yUpBound - yLowBound)/mVisXYRes;
+
+    double sSize = ui->plot->size().width();
+    if(sSize > ui->plot->size().height())
+        sSize = ui->plot->size().height();
+    sSize /= mVisXYRes + mVisXYRes;
+
+    int cMinH = 280;
+    int cMaxH = -100;
+    int cHStep = (cMaxH - cMinH) / mVisZRes;
+    int cMinSatur = 255;
+    int cMaxSatur = 255;
+    int cSaturStep = (cMaxSatur - cMinSatur) / mVisZRes;
+    int cVal = 255;
+
+    for(int i = 0 ; i < mVisZRes ; ++i)
+    {
+        mVisualizeGraphs[i] = ui->plot->addGraph();
+        mVisualizeGraphs[i]->setLineStyle( QCPGraph::lsNone );
+        mVisualizeGraphs[i]->setScatterStyle( QCP::ssSquare );
+        mVisualizeGraphs[i]->setScatterSize( sSize );
+        mVisualizeGraphs[i]->setPen( QPen( QColor::fromHsv(cMinH + (i*cHStep), cMinSatur + (i * cSaturStep) , cVal),  Qt::SolidPattern) );
+    }
+
+
+
+    double* values = new double[num * mDim];
+    for(int j = 0 ; j < mVisXYRes ; ++j)
+    {
+        for(int i = 0 ; i < mVisXYRes; ++i)
+        {
+            for(int k = 0 ; k < mDim ; ++k)
+            {
+                values[(j * mVisXYRes * mDim) + (i * mDim) + k] = 0;//project other axis to zero
+            }
+            values[(j * mVisXYRes * mDim) + (i * mDim) + xAxis] = xLowBound + (j * xPosStep);
+            values[(j * mVisXYRes * mDim) + (i * mDim) + yAxis] = yLowBound + (i * yPosStep);
+        }
+    }
+
+    std::vector< std::pair< double, double* > > tempData;
+    std::pair<double,double*> tempP;
+
+    double minValue = mOptFunc->getOptimalValue();
+    double maxValue = minValue;
+
+    double meanVal = 0;
+
+    for(int j = 0 ; j < mVisXYRes ; ++j)
+    {
+        for(int i = 0 ; i < mVisXYRes; ++i)
+        {
+            tempP.second = &(values[(j * mVisXYRes * mDim) + (i*mDim)]);
+            mOptFunc->evaluate(tempP.second, tempP.first );
+            meanVal += tempP.first;
+            if(tempP.first > maxValue)
+                maxValue = tempP.first;
+            tempP.first *= -1; //hack to get minheap easy
+            tempData.push_back(tempP);
+
+        }
+    }
+
+    meanVal /= num;
+
+    std::make_heap(tempData.begin(), tempData.end());
+
+    double valBucketStep = (meanVal - minValue) * 2 / (double)mVisZRes;
+    tempP.second=0;
+    tempP.first=minValue;
+
+    ui->plot->setCurrentLayer("bkgrnd");
+
+    for(int i = 0 ; i < mVisZRes ; ++i )
+    {
+        while(tempData.size()>0)
+        {
+            tempP = tempData.front();
+
+            std::pop_heap(tempData.begin(), tempData.end());
+            tempData.pop_back();
+
+            if((tempP.first * -1) > minValue+(valBucketStep*(i)) && i < mVisZRes - 1 )
+            {
+                mVisualizeGraphs[i+1]->addData( tempP.second[xAxis], tempP.second[yAxis] );
+                break;
+            }
+            else
+            {
+                mVisualizeGraphs[i]->addData( tempP.second[xAxis], tempP.second[yAxis] );
+            }
+        }
+    }
+
+    delete[] values;
+
+
+}
+
+void MainWindow::removeVisGraphs()
+{
+    if(mVisualizeGraphs == 0) return;
+
+    for(int i = 0 ; i < mVisZRes ; ++i)
+    {
+        ui->plot->removeGraph(mVisualizeGraphs[i]);//the remove function deletes the data I believe
+    }
+    delete[] mVisualizeGraphs;
+    mVisualizeGraphs = 0;
 }
 
 void MainWindow::createOptimizer(QString optName)
@@ -182,10 +328,16 @@ void MainWindow::createOptFunc()
     {
         mOptFunc = new GoldsteinPriceFunction(bounds, translation, scale);
     }
+//    else if( QString::compare( optFuncName, "schw") == 0 )
+//    {
+//        mOptFunc = new SchwefelFunction(dim, bounds, translation, scale);
+//    }
     else
     {
         mOptFunc = 0;
     }
+
+    initVisGraphs();
 }
 
 
@@ -194,7 +346,7 @@ void MainWindow::initPlot()
 {
     if(mOptimizer==0) return;
     mOptimizer->removeGraphs(ui->plot, ui->graph);
-    ui->plot->clearGraphs();
+    //ui->plot->clearGraphs();
     ui->graph->clearGraphs();
 
     mOptimizer->initGraphs(ui->plot, ui->graph);
@@ -217,6 +369,7 @@ void MainWindow::plotData()
     int xDim = ui->plotXDimSpin->value();
     int yDim = ui->plotYDimSpin->value();
 
+    ui->plot->setCurrentLayer("items");
     mOptimizer->plotData(xDim, yDim);
     mOptimizer->graphValues();
     ui->graph->xAxis->setRange(0, mOptimizer->getGenNum() + 1);
@@ -240,6 +393,22 @@ void MainWindow::updateGraphScale()
     ui->graph->replot();
 }
 
+void MainWindow::visDataCheckPressed()
+{
+    if(ui->visCheck->checkState() == Qt::Checked)
+    {
+        mVisualize = true;
+        initVisGraphs();
+    }
+    else
+    {
+        mVisualize = false;
+        removeVisGraphs();
+    }
+    ui->plot->replot();
+
+}
+
 void MainWindow::optComboChanged()
 {
     QString what = ui->optimizerCombo->itemData(ui->optimizerCombo->currentIndex()).toString();
@@ -254,15 +423,7 @@ void MainWindow::functionComboChanged()
     //todo: make this better somehow
 
 
-    if( QString::compare( optFuncName, "sphere") == 0 )
-    {
-         ui->dimSpin->setEnabled(true);
-    }
-    else if( QString::compare( optFuncName, "gRastrigin") == 0 )
-    {
-         ui->dimSpin->setEnabled(true);
-    }
-    else if( QString::compare( optFuncName, "rosenbrock") == 0 )
+    if( QString::compare( optFuncName, "rosenbrock") == 0 )
     {
         ui->dimSpin->setEnabled(false);
         ui->dimSpin->setValue(2);
@@ -313,6 +474,10 @@ void MainWindow::dimSpinChanged()
     {
         defaultBounds = GoldsteinPriceFunction::getDefaultBounds(dim);
     }
+//    else if( QString::compare( optFuncName, "schw") == 0 )
+//    {
+//        defaultBounds = SchwefelFunction::getDefaultBounds(dim);
+//    }
     else
     {
         defaultBounds = new double[dim*2];
@@ -399,6 +564,9 @@ void MainWindow::dimSpinChanged()
         mTranslateLayout->addWidget(mTranslateSpins[i]);
     }
 
+    ui->plotXDimSpin->setMaximum(dim);
+    ui->plotYDimSpin->setMaximum(dim);
+
     mDim = dim;
 }
 
@@ -427,6 +595,7 @@ void MainWindow::initButtonPressed()
     ui->plotXDimSpin->setMaximum(mOptimizer->getDimension() - 1);
     ui->plotYDimSpin->setMaximum(mOptimizer->getDimension() - 1);
     initPlot();
+    initVisGraphs();
     plotData();
 }
 

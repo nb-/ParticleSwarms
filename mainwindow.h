@@ -39,6 +39,14 @@ private:
     QDoubleSpinBox** mTranslateSpins;
     QVBoxLayout* mTranslateLayout;
 
+    //stuff for plotting function topologies
+    bool mVisualize;
+    QCPGraph** mVisualizeGraphs;
+    int mVisXYRes;
+    int mVisZRes;
+    void initVisGraphs();
+    void removeVisGraphs();
+
     void createOptimizer(QString optName);
     void createOptFunc();
 public:
@@ -50,6 +58,8 @@ public:
 
     void clearButtonPressed();
     void updateGraphScale();
+
+    void visDataCheckPressed();
 
     void optComboChanged();
     void functionComboChanged();

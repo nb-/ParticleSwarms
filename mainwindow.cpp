@@ -12,6 +12,7 @@
 #include "optimizationFunctions.h"
 #include "canonpsocontroller.h"
 #include "constrictionpsocontroller.h"
+#include "barebonespsocontroller.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -37,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->optimizerCombo->addItem("Canonical PSO", "canon");
     ui->optimizerCombo->addItem("Constriction Coefficient PSO", "constriction");
+    ui->optimizerCombo->addItem("BareBones Particle Swarm", "barebones");
 
     ui->functionCombo->addItem("Sphere Function", "sphere");
     ui->functionCombo->addItem("Generalized Rastrigin Function", "gRastrigin");
@@ -242,6 +244,10 @@ void MainWindow::createOptimizer(QString optName)
     else if ( QString::compare( optName, "constriction" ) == 0) // Constriction PSO
     {
         mOptimizer = new ConstrictionPSOController();
+    }
+    else if ( QString::compare( optName, "barebones" ) == 0) // Constriction PSO
+    {
+        mOptimizer = new BareBonesPSOController();
     }
     else
     {
@@ -624,7 +630,7 @@ void MainWindow::zoomFitButtonPressed()
 }
 
 MainWindow::~MainWindow()
-{
+{   //TODO: several things not deleted properly due to laziness, fix when not lazy (hahaha yeah right)
     if(mUpperBoundSpins != 0)
     {
         for(int i = 0 ; i < mDim ; ++i)
@@ -657,6 +663,8 @@ MainWindow::~MainWindow()
     delete mOptimizer;
     delete qout;
     delete ui;
+
+
 }
 
 

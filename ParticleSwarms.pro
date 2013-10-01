@@ -23,7 +23,9 @@ SOURCES += main.cpp\
     canonpsopopulation.cpp \
     constrictionpsopopulation.cpp \
     canonpsocontroller.cpp \
-    constrictionpsocontroller.cpp
+    constrictionpsocontroller.cpp \
+    barebonespsopopulation.cpp \
+    barebonespsocontroller.cpp
 
 HEADERS  += mainwindow.h \
     optimizationFunctions.h \
@@ -35,6 +37,9 @@ HEADERS  += mainwindow.h \
     canonpsopopulation.h \
     constrictionpsopopulation.h \
     canonpsocontroller.h \
-    constrictionpsocontroller.h
+    constrictionpsocontroller.h \
+    barebonespsopopulation.h \
+    barebonespsocontroller.h \
+    randomhelper.h
 
 FORMS    += mainwindow.ui

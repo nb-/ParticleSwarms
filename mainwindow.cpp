@@ -45,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->functionCombo->addItem("Rosenbrock Function", "rosenbrock");
     ui->functionCombo->addItem("Beale's Function", "beal");
     ui->functionCombo->addItem("Goldstein-Price Function", "gp");
+    ui->functionCombo->addItem("Griewank Function", "grie");
     //ui->functionCombo->addItem("Schwefel Function", "schw");
 
     QObject::connect(ui->stepButton, &QAbstractButton::clicked, this, &MainWindow::stepButtonPressed);
@@ -334,6 +335,10 @@ void MainWindow::createOptFunc()
     {
         mOptFunc = new GoldsteinPriceFunction(bounds, translation, scale);
     }
+    else if( QString::compare( optFuncName, "grie") == 0 )
+    {
+        mOptFunc = new GriewankFunction(dim, bounds, translation, scale);
+    }
 //    else if( QString::compare( optFuncName, "schw") == 0 )
 //    {
 //        mOptFunc = new SchwefelFunction(dim, bounds, translation, scale);
@@ -479,6 +484,10 @@ void MainWindow::dimSpinChanged()
     else if( QString::compare( optFuncName, "rosenbrock") == 0 )
     {
         defaultBounds = GoldsteinPriceFunction::getDefaultBounds(dim);
+    }
+    else if( QString::compare( optFuncName, "grie") == 0 )
+    {
+        defaultBounds = GriewankFunction::getDefaultBounds(dim);
     }
 //    else if( QString::compare( optFuncName, "schw") == 0 )
 //    {

@@ -160,6 +160,39 @@ public:
     }
 };
 
+class GriewankFunction : public OptimizationFunction
+{
+public:
+    GriewankFunction(int dim, double* bounds, double* offsets = 0, double* stretch = 0) : OptimizationFunction(dim,bounds, offsets, stretch) {}
+
+    static double* getDefaultBounds(int dim)
+    {
+        double* defBounds = new double[dim * 2];
+        for(int i = 0 ; i < dim ; ++i)
+        {
+            defBounds[i] = -600;
+            defBounds[i+dim] = 600;
+        }
+        return defBounds;
+    }
+
+    virtual void evaluate(double *position, double &outValue)
+    {
+        outValue = 0;
+        double tempOut = 1;
+        double temp = 0;
+        for(int i = 0 ; i < mDim ; ++i)
+        {
+            temp = transformInputValue(i, position[i]);
+            outValue += (temp * temp);
+            tempOut *= cos(temp/sqrt( (double)mDim ));
+        }
+        outValue /= 4000;
+        outValue += 1 - tempOut;
+
+    }
+};
+
 class RosenbrockFunction : public OptimizationFunction
 {   //Rosenbrock Function, restricted to 2D
 public:
@@ -251,6 +284,8 @@ public:
     }
 
 };
+
+
 
 //class AckleysFunction : public OptimizationFunction
 //{

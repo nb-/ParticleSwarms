@@ -13,9 +13,6 @@ class BareBonesPSOController : public OptimizerController
 protected:
 
     QSpinBox* mPopSpin;
-    QDoubleSpinBox* mPAccSpin;
-    QDoubleSpinBox* mGAccSpin;
-
 public:
     BareBonesPSOController();
     virtual ~BareBonesPSOController();

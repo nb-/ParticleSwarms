@@ -9,12 +9,8 @@
 
 class BareBonesPSOPopulation : public Population
 {
-protected:
-    double mPAccel;
-    double mGAccel;
-
 public:
-    BareBonesPSOPopulation(int size, double pAccel, double gAccel, OptimizationFunction* optFunc);
+    BareBonesPSOPopulation(int size, OptimizationFunction* optFunc);
     virtual ~BareBonesPSOPopulation();
     virtual void updatePopulation();
 };

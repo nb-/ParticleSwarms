@@ -1,9 +1,7 @@
 #include "barebonespsopopulation.h"
-#include "misc.h"
-BareBonesPSOPopulation::BareBonesPSOPopulation(int size, double pAccel, double gAccel, OptimizationFunction *optFunc)
-   :Population(size, optFunc),
-    mPAccel(pAccel),
-    mGAccel(gAccel)
+#include "randomhelper.h"
+BareBonesPSOPopulation::BareBonesPSOPopulation(int size, OptimizationFunction *optFunc)
+   :Population(size, optFunc)
 {
 }
 
@@ -21,15 +19,9 @@ void BareBonesPSOPopulation::updatePopulation()
     int maxJIt = minJIt + mDim;
     int maxIIt = mSize * mDim;
 
-    double rPA;
-    double rGA;
-
     while(i < maxIIt)
     {
-        rPA = ((double)rand()/(double)RAND_MAX) * mPAccel;
-        rGA = ((double)rand()/(double)RAND_MAX) * mGAccel;
-
-        mPositions[i]   =  ( (rPA * mPrevBestPositions[i] ) + ( rGA * mPrevBestPositions[j]) ) / (rPA + rGA);
+        mPositions[i]   =  ( (mPrevBestPositions[i] ) + (mPrevBestPositions[j]) ) / 2;
 
         mPositions[i] += randGauss() * (mPrevBestPositions[j] - mPrevBestPositions[i]);
 

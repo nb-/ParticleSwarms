@@ -1,7 +1,7 @@
 #include "barebonespsopopulation.h"
 #include "randomhelper.h"
 BareBonesPSOPopulation::BareBonesPSOPopulation(int size, OptimizationFunction *optFunc)
-   :Population(size, optFunc)
+   :ParticlePopulation(size, optFunc)
 {
 }
 

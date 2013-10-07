@@ -5,9 +5,9 @@
 //    Particles With Velocities | Abstract
 //==================================================================
 
-#include "population.h"
+#include "particlepopulation.h"
 
-class ParticleVPopulation : public Population
+class ParticleVPopulation : public ParticlePopulation
 {
 protected:
     double* mVelocities;

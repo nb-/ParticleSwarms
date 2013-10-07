@@ -18,21 +18,25 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     qcustomplot.cpp \
     optimizercontroller.cpp\
-    population.cpp \
     particlevpopulation.cpp \
     canonpsopopulation.cpp \
     constrictionpsopopulation.cpp \
     canonpsocontroller.cpp \
     constrictionpsocontroller.cpp \
     barebonespsopopulation.cpp \
-    barebonespsocontroller.cpp
+    barebonespsocontroller.cpp \
+    newdev1population.cpp \
+    particlepopulation.cpp \
+    population.cpp \
+    newdev1controller.cpp \
+    newdev2population.cpp \
+    newdev2controller.cpp
 
 HEADERS  += mainwindow.h \
     optimizationFunctions.h \
     QDebugStream.h \
     qcustomplot.h \
     optimizercontroller.h\
-    population.h \
     particlevpopulation.h \
     canonpsopopulation.h \
     constrictionpsopopulation.h \
@@ -40,6 +44,12 @@ HEADERS  += mainwindow.h \
     constrictionpsocontroller.h \
     barebonespsopopulation.h \
     barebonespsocontroller.h \
-    randomhelper.h
+    randomhelper.h \
+    newdev1population.h \
+    particlepopulation.h \
+    population.h \
+    newdev1controller.h \
+    newdev2population.h \
+    newdev2controller.h
 
 FORMS    += mainwindow.ui

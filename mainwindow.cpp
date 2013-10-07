@@ -13,6 +13,8 @@
 #include "canonpsocontroller.h"
 #include "constrictionpsocontroller.h"
 #include "barebonespsocontroller.h"
+#include "newdev1controller.h"
+#include "newdev2controller.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -39,6 +41,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->optimizerCombo->addItem("Canonical PSO", "canon");
     ui->optimizerCombo->addItem("Constriction Coefficient PSO", "constriction");
     ui->optimizerCombo->addItem("BareBones Particle Swarm", "barebones");
+    ui->optimizerCombo->addItem("NEW: First", "new1");
+    ui->optimizerCombo->addItem("NEW: Second", "new2");
 
     ui->functionCombo->addItem("Sphere Function", "sphere");
     ui->functionCombo->addItem("Generalized Rastrigin Function", "gRastrigin");
@@ -249,6 +253,14 @@ void MainWindow::createOptimizer(QString optName)
     else if ( QString::compare( optName, "barebones" ) == 0) // Constriction PSO
     {
         mOptimizer = new BareBonesPSOController();
+    }
+    else if ( QString::compare( optName, "new1" ) == 0) // Constriction PSO
+    {
+        mOptimizer = new NewDev1Controller();
+    }
+    else if ( QString::compare( optName, "new2" ) == 0) // Constriction PSO
+    {
+        mOptimizer = new NewDev2Controller();
     }
     else
     {

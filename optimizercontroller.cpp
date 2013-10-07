@@ -90,10 +90,14 @@ void OptimizerController::initGraphs(QCustomPlot* plot, QCustomPlot* graph)
 
 void OptimizerController::removeGraphs(QCustomPlot *plot, QCustomPlot* graph)
 {
-    plot->removeGraph(mDataGraph);//remove should free data?
-    plot->removeGraph(mBestPointGraph);
-    plot->removeGraph(mOptimalPointGraph);
-    graph->removeGraph(mValueGraph);
+    if(mDataGraph!=0)
+        plot->removeGraph(mDataGraph);//remove should free data?
+    if(mBestPointGraph!=0)
+        plot->removeGraph(mBestPointGraph);
+    if(mOptimalPointGraph!=0)
+        plot->removeGraph(mOptimalPointGraph);
+    if(mValueGraph!=0)
+        graph->removeGraph(mValueGraph);
     mOptimalPointGraph = 0;
     mDataGraph = 0;
     mBestPointGraph = 0;

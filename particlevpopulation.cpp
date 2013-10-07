@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 ParticleVPopulation::ParticleVPopulation(int size, OptimizationFunction *optFunc)
-   :Population(size, optFunc)
+   :ParticlePopulation(size, optFunc)
 {
     mVelocities = new double[mSize * mDim];
 }
@@ -18,7 +18,7 @@ double *ParticleVPopulation::getVelocityPointer(int individualIndex) const
 
 void ParticleVPopulation::initializePopulation(double *range)
 {
-    Population::initializePopulation();
+    ParticlePopulation::initializePopulation();
 
     if(range==0)
         range = mBounds;

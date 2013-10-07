@@ -5,9 +5,9 @@
 //    Implementation of the BareBones Particle Swarm
 //==================================================================
 
-#include "population.h"
+#include "particlepopulation.h"
 
-class BareBonesPSOPopulation : public Population
+class BareBonesPSOPopulation : public ParticlePopulation
 {
 public:
     BareBonesPSOPopulation(int size, OptimizationFunction* optFunc);

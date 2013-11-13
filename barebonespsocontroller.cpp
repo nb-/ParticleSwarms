@@ -36,8 +36,9 @@ void BareBonesPSOController::setParameterBox(QWidget *parent)
 
 }
 
-void BareBonesPSOController::initializeOptimizer(OptimizationFunction *optFunc)
+void BareBonesPSOController::initializeOptimizer(OptimizationFunction *optFunc, double *initRange)
 {//todo: add null checks
+    OptimizerController::initializeOptimizer(optFunc, initRange);
     if(mPopSpin == 0) return;
     if(optFunc == 0) return;
 
@@ -47,5 +48,6 @@ void BareBonesPSOController::initializeOptimizer(OptimizationFunction *optFunc)
     int pop = mPopSpin->value();
 
     mPopulation = new BareBonesPSOPopulation(pop, optFunc);
-    mPopulation->initializePopulation();
+    mPopulation->initializePopulation(initRange);
+    mBestVals.push_back(mPopulation->getBestValueFound());
 }

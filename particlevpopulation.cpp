@@ -18,7 +18,7 @@ double *ParticleVPopulation::getVelocityPointer(int individualIndex) const
 
 void ParticleVPopulation::initializePopulation(double *range)
 {
-    ParticlePopulation::initializePopulation();
+    ParticlePopulation::initializePopulation(range);
 
     if(range==0)
         range = mBounds;

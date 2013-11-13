@@ -25,7 +25,7 @@ public:
     virtual void removeGraphs(QCustomPlot* plot, QCustomPlot* graph);
 
     virtual void setParameterBox(QWidget* parent);
-    virtual void initializeOptimizer(OptimizationFunction* optFunc);
+    virtual void initializeOptimizer(OptimizationFunction* optFunc, double* initRange = 0);
 
 };
 

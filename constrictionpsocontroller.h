@@ -10,7 +10,7 @@ public:
     virtual ~ConstrictionPSOController();
 
     virtual void setParameterBox(QWidget* parent);
-    virtual void initializeOptimizer(OptimizationFunction* optFunc);
+    virtual void initializeOptimizer(OptimizationFunction* optFunc, double* initRange = 0);
 };
 
 #endif // CONSTRICTIONPSOCONTROLLER_H

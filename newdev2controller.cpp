@@ -87,8 +87,10 @@ void NewDev2Controller::setParameterBox(QWidget *parent)
 
 }
 
-void NewDev2Controller::initializeOptimizer(OptimizationFunction *optFunc)
+void NewDev2Controller::initializeOptimizer(OptimizationFunction *optFunc, double *initRange)
 {
+    OptimizerController::initializeOptimizer(optFunc, initRange);
+
     if(mDPopSpin == 0) return;
     if(optFunc == 0) return;
     if(mPopulation != 0)
@@ -98,5 +100,7 @@ void NewDev2Controller::initializeOptimizer(OptimizationFunction *optFunc)
     int pPop = mPPopSpin->value();
 
     mPopulation = new NewDev2Population(pPop,dPop,optFunc);
-    mPopulation->initializePopulation();
+    mPopulation->initializePopulation(initRange);
+
+    mBestVals.push_back(mPopulation->getBestValueFound());
 }

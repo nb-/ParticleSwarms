@@ -74,8 +74,9 @@ void CanonPSOController::setParameterBox(QWidget *parent)
 
 }
 
-void CanonPSOController::initializeOptimizer(OptimizationFunction *optFunc)
+void CanonPSOController::initializeOptimizer(OptimizationFunction *optFunc, double *initRange)
 {//todo: add null checks
+    OptimizerController::initializeOptimizer(optFunc, initRange);
     if(mPopSpin == 0) return;
     if(optFunc == 0) return;
 
@@ -88,5 +89,7 @@ void CanonPSOController::initializeOptimizer(OptimizationFunction *optFunc)
     double gA = mGAccSpin->value();
 
     mPopulation = new CanonPSOPopulation(pop, in, pA, gA, optFunc);
-    mPopulation->initializePopulation();
+    mPopulation->initializePopulation(initRange);
+
+    mBestVals.push_back(mPopulation->getBestValueFound());
 }

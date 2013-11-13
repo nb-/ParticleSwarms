@@ -39,6 +39,8 @@ private:
     QDoubleSpinBox** mTranslateSpins;
     QVBoxLayout* mTranslateLayout;
 
+    std::vector<QCPGraph*> mTestRunGraphs;
+
     //stuff for plotting function topologies
     bool mVisualize;
     QCPGraph** mVisualizeGraphs;
@@ -71,6 +73,11 @@ public:
 
     void zoomBoundsButtonPressed();
     void zoomFitButtonPressed();
+
+    void offsetBoundsButtonPressed();
+    void resetBoundsButtonPressed();
+
+    void performTestsButtonPressed();
 
 };
 

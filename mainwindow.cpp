@@ -58,8 +58,10 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->zoomFitButton, &QAbstractButton::clicked, this, &MainWindow::zoomFitButtonPressed);
     QObject::connect(ui->clearOutputButton, &QAbstractButton::clicked, this, &MainWindow::clearButtonPressed);
 
-
     QObject::connect(ui->runForButton, &QAbstractButton::clicked, this, &MainWindow::runForButtonPressed);
+
+    QObject::connect(ui->performTestsButton, &QAbstractButton::clicked, this, &MainWindow::performTestsButtonPressed);
+
 
     QObject::connect(ui->plotXDimSpin, &QAbstractSpinBox::editingFinished, this, &MainWindow::plotData);
     QObject::connect(ui->plotYDimSpin, &QAbstractSpinBox::editingFinished, this, &MainWindow::plotData);
@@ -95,6 +97,7 @@ MainWindow::MainWindow(QWidget *parent) :
     optComboChanged();
     dimSpinChanged();
     createOptFunc();
+
 }
 
 void MainWindow::initVisGraphs()
@@ -403,6 +406,13 @@ void MainWindow::plotData()
 void MainWindow::clearButtonPressed()
 {
     ui->textEdit->clear();
+    QCPGraph* t;
+    for(int i = 0 ; i < mTestRunGraphs.size() ; ++i)
+    {
+        t = mTestRunGraphs.back();
+        mTestRunGraphs.pop_back();
+        delete t;
+    }
 }
 
 void MainWindow::updateGraphScale()
@@ -618,7 +628,23 @@ void MainWindow::initButtonPressed()
 {
 
     createOptFunc();
-    mOptimizer->initializeOptimizer(mOptFunc);
+
+    int dim = ui->dimSpin->value();
+
+    double* initBounds = 0;
+
+    if(ui->offsetInitCheck->checkState() == Qt::Checked)
+    {
+        initBounds = new double[dim*2];
+
+        for(int i = 0 ; i < dim ; ++i)
+        {
+            initBounds[i] = mUpperBoundSpins[i]->value() - (mUpperBoundSpins[i]->value() - mLowerBoundSpins[i]->value()) / 4;
+            initBounds[i + dim] = mUpperBoundSpins[i]->value();
+        }
+    }
+
+    mOptimizer->initializeOptimizer(mOptFunc,initBounds);
     ui->plotXDimSpin->setMaximum(mOptimizer->getDimension() - 1);
     ui->plotYDimSpin->setMaximum(mOptimizer->getDimension() - 1);
     initPlot();
@@ -648,6 +674,94 @@ void MainWindow::zoomFitButtonPressed()
     ui->plot->yAxis->setRange( yL - padding, yU + padding );
 
     ui->plot->replot();
+}
+
+void MainWindow::offsetBoundsButtonPressed()
+{
+
+}
+
+void MainWindow::resetBoundsButtonPressed()
+{
+
+}
+
+void MainWindow::performTestsButtonPressed()
+{
+
+    createOptFunc();
+
+    int dim = ui->dimSpin->value();
+
+    double* initBounds = 0;
+
+    if(ui->offsetInitCheck->checkState() == Qt::Checked)
+    {
+        initBounds = new double[dim*2];
+
+        for(int i = 0 ; i < dim ; ++i)
+        {
+            initBounds[i] = mUpperBoundSpins[i]->value() - (mUpperBoundSpins[i]->value() - mLowerBoundSpins[i]->value()) / 4;
+            initBounds[i + dim] = mUpperBoundSpins[i]->value();
+        }
+    }
+
+
+
+
+    std::vector<double> tempVals;
+
+    int numTests = ui->numTestsSpin->value();
+    int iters = ui->runForSpin->value() + 1;
+
+    double vals[iters];
+
+    for(int i = 0 ; i < iters ; ++i)
+        vals[i] = 0;
+
+    for(int i = 0 ; i < numTests ; ++i)
+    {
+        mOptimizer->initializeOptimizer(mOptFunc, initBounds);
+        mOptimizer->runFor( iters, false);
+        tempVals = mOptimizer->getBestVals();
+
+        for(int j = 0 ; j < iters ; ++j)
+        {
+            vals[j] += tempVals[j];
+        }
+
+    }
+
+    for(int i = 0 ; i < iters ; ++i)
+        vals[i] /= numTests;
+
+    mTestRunGraphs.push_back( ui->graph->addGraph() );
+
+    QCPGraph* tempG = mTestRunGraphs.back();
+
+    tempG->clearData();
+    tempG->setLineStyle( QCPGraph::lsLine );
+    tempG->setScatterStyle( QCP::ssNone );
+    tempG->setScatterSize(4);
+
+    double resC = ui->optimizerCombo->count();
+    double curC = ui->optimizerCombo->currentIndex();
+
+    int cMinH = 280;
+    int cMaxH = -100;
+    int cHStep = (cMaxH - cMinH) / resC;
+
+    tempG->setPen( QPen( QColor::fromHsv(cMinH + (curC*cHStep), 255 , 255),  Qt::SolidPattern) );
+
+    for(int j = 0 ; j < iters ; ++j)
+    {
+        tempG->addData(j, vals[j]);
+    }
+
+    ui->graph->xAxis->setRange(0, iters);
+    ui->graph->yAxis->setRange(0, vals[0]);
+    ui->graph->replot();
+    std::cout << "Best: " <<  mOptimizer->getBestValue() << std::endl;
 }
 
 MainWindow::~MainWindow()

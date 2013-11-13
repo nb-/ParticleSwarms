@@ -11,6 +11,8 @@
 //    Class which provides UI control interface for optimizers
 //==================================================================
 
+#include <vector>
+
 class OptimizerController
 {
 protected:
@@ -23,6 +25,8 @@ protected:
 
     QGridLayout* mParLayout;
 
+    std::vector<double> mBestVals;
+
 public:
     OptimizerController();
     virtual ~OptimizerController();
@@ -33,7 +37,7 @@ public:
     int getPopulationSize() const;
     int getDimension() const;
 
-
+    std::vector<double> getBestVals();
 
     void initializePopulation(OptimizationFunction *optFunc);
     void step();
@@ -53,7 +57,7 @@ public:
 
     virtual void setParameterBox(QWidget* parent) = 0;
     void removeParameterBox(QWidget* parent);
-    virtual void initializeOptimizer(OptimizationFunction* optFunc) = 0;
+    virtual void initializeOptimizer(OptimizationFunction* optFunc, double* initRange = 0);
 };
 
 #endif // OPTIMIZERCONTROLLER_H

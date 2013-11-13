@@ -2,6 +2,7 @@
 #define MISC_H
 
 #include <stdlib.h>
+#include <math.h>
 
 inline double randGauss()
 {//gaussian distribution with mean 0 and std 1
@@ -20,5 +21,11 @@ inline double randGauss()
     result += (double)rand() / RAND_MAX;
     return result;
 }
+
+inline double randDoubleExp()
+{//double-exponential distribution with mean 0 and std 1
+    return log(rand()) - log(rand());
+}
+
 
 #endif // MISC_H

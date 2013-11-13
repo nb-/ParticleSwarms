@@ -53,7 +53,7 @@ void ConstrictionPSOController::setParameterBox(QWidget *parent)
 
 }
 
-void ConstrictionPSOController::initializeOptimizer(OptimizationFunction *optFunc)
+void ConstrictionPSOController::initializeOptimizer(OptimizationFunction *optFunc, double *initRange)
 {//todo: add null checks
     if(mPopSpin == 0) return;
     if(optFunc == 0) return;
@@ -66,5 +66,7 @@ void ConstrictionPSOController::initializeOptimizer(OptimizationFunction *optFun
     double gA = mGAccSpin->value();
 
     mPopulation = new ConstrictionPSOPopulation(pop,pA,gA, optFunc);
-    mPopulation->initializePopulation();
+    mPopulation->initializePopulation(initRange);
+
+    mBestVals.push_back(mPopulation->getBestValueFound());
 }

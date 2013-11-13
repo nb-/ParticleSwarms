@@ -98,11 +98,11 @@ void NewDev2Population::updatePopulation()
     int* mNeighbours = new int[mDSize];
 
     temp = mValSort.at(0);
-    mNeighbours[0] = temp.second;
-    for(int i = 1 ; i < mDSize ; ++i)
+    //mNeighbours[0] = temp.second;
+    for(int i = 0 ; i < mDSize ; ++i)
     {
-        temp = mValSort.at( rand() % ( i ) );
-        mNeighbours[i] = temp.second;
+        //temp = mValSort.at( rand() % ( i ) );
+        mNeighbours[i] = mBestPointIndex;
     }
 
     int* poolIndices = new int[mDSize + 1]; //used to assign each DParticle a number of Points
@@ -151,18 +151,21 @@ void NewDev2Population::updatePopulation()
         {
             tempPm[j] = (mDPositions[(m * mDim) + j] + mDPositions[( mNeighbours[i] * mDim ) + j]) / 2;
             tempVal = mDPositions[(m * mDim) + j] - mDPositions[( mNeighbours[i] * mDim ) + j];
-
+            if(m == mBestPointIndex){
+                tempVal = mDPositions[(m * mDim) + j] - mDPositions[( (mValSort.at(1)).second * mDim ) + j];
+            }
+                /*
             if(i == 0)//change?
                 tempVal = mDPositions[(m * mDim) + j] - mDPositions[( mNeighbours[1] * mDim ) + j];
             if(tempVal == 0)
                 tempVal = (mBounds[mDim + j] - mBounds[j])/10;
-
+*/
             //todo: decide how to do the "local search" for best point
 
             for( int k = poolIndices[i] ; k < poolIndices[i + 1] ; ++k)
             {
                 mPositions[(k * mDim) + j] = tempPm[j] + (randGauss() * tempVal);
-
+                //mPositions[(k * mDim) + j] = tempPm[j] + (randDoubleExp() * tempVal);
                 if(mPositions[(k * mDim) + j] > mBounds[mDim + j])
                 {
                     mPositions[(k * mDim) + j] = mBounds[mDim + j];
@@ -184,7 +187,7 @@ void NewDev2Population::updatePopulation()
         m = temp.second;
         tempVal = ((double)rand()/(double)RAND_MAX) * mDSize;
         bestInd = -1;
-        if(tempVal > i) //choose best
+        if(true)//if(tempVal > i) //choose best
         {
             for( int k = poolIndices[i] ; k < poolIndices[i + 1] ; ++k)
             {

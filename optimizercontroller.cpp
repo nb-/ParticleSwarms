@@ -7,12 +7,16 @@ OptimizerController::OptimizerController()
     mDataGraph(0),
     mBestPointGraph(0),
     mOptimalPointGraph(0),
-    mValueGraph(0)
+    mValueGraph(0),
+    mBestVals()
 {
+
 }
 
 OptimizerController::~OptimizerController()
 {
+
+    mBestVals.clear();
     delete mPopulation;
 
     foreach (QObject *object, mParLayout->parent()->children()) {//hack to get it to work, fix maybe
@@ -53,7 +57,12 @@ void OptimizerController::plotData(int xDim, int yDim) const
 
 void OptimizerController::graphValues() const
 {
-    mValueGraph->addData(mPopulation->getGenerationNumber(), mPopulation->getBestValueFound());
+
+    mValueGraph->clearData();
+    for(int i = 0 ; i < mBestVals.size() ; ++i)
+    {
+        mValueGraph->addData(i, mBestVals[i]);
+    }
 }
 
 void OptimizerController::initGraphs(QCustomPlot* plot, QCustomPlot* graph)
@@ -107,6 +116,7 @@ void OptimizerController::removeGraphs(QCustomPlot *plot, QCustomPlot* graph)
 void OptimizerController::step()
 {
     mPopulation->step();
+    mBestVals.push_back(mPopulation->getBestValueFound());
 }
 void OptimizerController::runFor(int iterations, bool graph)
 {
@@ -115,7 +125,7 @@ void OptimizerController::runFor(int iterations, bool graph)
         while(iterations > 0)
         {
             mPopulation->step();
-            graphValues();
+            mBestVals.push_back(mPopulation->getBestValueFound());
             --iterations;
         }
     }
@@ -124,6 +134,7 @@ void OptimizerController::runFor(int iterations, bool graph)
         while(iterations > 0)
         {
             mPopulation->step();
+            mBestVals.push_back(mPopulation->getBestValueFound());
             --iterations;
         }
     }
@@ -133,6 +144,11 @@ double OptimizerController::getBestValue() const { return mPopulation->getBestVa
 int OptimizerController::getGenNum() const { return mPopulation->getGenerationNumber(); }
 int OptimizerController::getPopulationSize() const { return mPopulation->getPopSize(); }
 int OptimizerController::getDimension() const { return mPopulation->getDim(); }
+
+std::vector<double> OptimizerController::getBestVals()
+{
+    return mBestVals;
+}
 double OptimizerController::getLowerBound(int dim) const{ return mPopulation->getLowerBound(dim); }
 double OptimizerController::getUpperBound(int dim) const{ return mPopulation->getUpperBound(dim); }
 
@@ -171,6 +187,11 @@ double OptimizerController::getLowerFit(int dim) const
 void OptimizerController::removeParameterBox(QWidget *parent)
 {
     delete mParLayout;
+}
+
+void OptimizerController::initializeOptimizer(OptimizationFunction *optFunc, double *initRange)
+{
+    mBestVals.clear();
 }
 
 

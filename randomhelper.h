@@ -27,5 +27,10 @@ inline double randDoubleExp()
     return log(rand()) - log(rand());
 }
 
+inline double randDouble()
+{
+    return ((double)rand())/(double)RAND_MAX;
+}
+
 
 #endif // MISC_H

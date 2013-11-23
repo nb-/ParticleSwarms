@@ -11,13 +11,17 @@ NewDev2Population::NewDev2Population(int pointPopSize, int dPopSize, Optimizatio
     mDSize(dPopSize)
 {
     mDValues = new double[mDSize];
+    mDAPValues = new double[mDSize];
     mDPositions = new double[mDSize * mDim];
+    mPoolIndices = new int[mDSize+1];
 }
 
 NewDev2Population::~NewDev2Population()
 {
     delete[] mDValues;
+    delete[] mDAPValues;
     delete[] mDPositions;
+    delete[] mPoolIndices;
 }
 
 int NewDev2Population::getDSize() const { return mDSize; }
@@ -76,6 +80,8 @@ void NewDev2Population::initializePopulation(double *range)
     for(int i = 0 ; i < mSize ; ++i)
         mValues[i] = 0;
 
+    for(int i = 0 ; i < mDSize ; ++i)
+        mDAPValues[i] = mDValues[i];
 
 }
 void NewDev2Population::evaluatePopulation()
@@ -85,87 +91,85 @@ void NewDev2Population::evaluatePopulation()
 
 void NewDev2Population::updatePopulation()
 {
-    std::pair<double, int> temp;
-    mValSort.clear();
-    for(int i = 0 ; i < mDSize ; ++i)//todo: figure out how to modify data without having to readd all
-    {
-        temp.first = mDValues[i];
-        temp.second = i;
-        mValSort.push_back( temp );
-    }
-    std::sort(mValSort.begin(), mValSort.end()); //sort dParticles based on value
-
-    int* mNeighbours = new int[mDSize];
-
-    temp = mValSort.at(0);
-    //mNeighbours[0] = temp.second;
+    //normalize dapVals
+    int tempI = 0;
+    double tempD = 0;
+    double tempD2 = 0;
     for(int i = 0 ; i < mDSize ; ++i)
     {
-        //temp = mValSort.at( rand() % ( i ) );
-        mNeighbours[i] = mBestPointIndex;
+        tempD += mDAPValues[i];
     }
-
-    int* poolIndices = new int[mDSize + 1]; //used to assign each DParticle a number of Points
-
-    int minimumPoolSize = 1;
-    int pool = mSize - (minimumPoolSize * mDSize);
-    int tempInt;
-    std::vector<int> tempVec;
+    if(tempD == 0) tempD = 1;
 
     for(int i = 0 ; i < mDSize ; ++i)
     {
-        tempInt = ceil((double)pool / (double)(mDSize / 2));
-        if(tempInt>1)
-            tempInt = (rand() % (tempInt - 1)) + 1;
-        tempVec.push_back(tempInt);
-        pool -= tempInt;
+        mDAPValues[i] = mDAPValues[i] / tempD; //scale values to sum to 1
     }
-    while(pool > 0)
+
+
+    tempI = mSize - mDSize;//tempI = pool size
+    mPoolIndices[0] = 0;
+    for(int i = 1 ; i <= mDSize ; ++i)
     {
-        tempInt = ceil((double)pool / (double)(mDSize / 2));
-        if(tempInt>1)
-            tempInt = (rand() % (tempInt - 1)) + 1;
-        tempVec.at( rand() % mDSize ) += tempInt;
-        pool -= tempInt;
+        mPoolIndices[i] = mPoolIndices[i-1] + floor(mDAPValues[i-1] * tempI) + 1;
     }
-    std::sort(tempVec.begin(), tempVec.end());
+    mPoolIndices[mDSize] = mSize;
 
-
-    poolIndices[0] = 0;
-    for(int i = 1 ; i < mDSize ; ++i)
-    {
-        poolIndices[i] = poolIndices[i-1] + tempVec.at(mDSize - i) + 1;
-    }
-    poolIndices[mDSize] = mSize;
-
-    tempVec.clear();
-
-    double tempVal;
     double* tempPm = new double[mDim];
-    int m;
+    double* tempMean = new double[mDim];
+    double* tempVariance = new double[mDim];
+    for(int i = 0 ; i < mDim ; ++i)
+    {
+        tempMean[i] = 0;
+        for(int j = 0 ; j < mDSize ; ++j)
+        {
+            tempMean[i] += mDPositions[(j*mDim) + i];
+        }
+        tempMean[i] /= mDSize;
+    }
+
+    for(int i = 0 ; i < mDim ; ++i)
+    {
+        tempVariance[i] = 0;
+        for(int j = 0 ; j < mDSize ; ++j)
+        {
+            tempVariance[i] += (mDPositions[(j*mDim) + i] - tempMean[i]) * (mDPositions[(j*mDim) + i] - tempMean[i]);
+        }
+        tempVariance[i] = sqrt(tempVariance[i]) / mDSize;
+        //tempVariance[i] /= mDSize;
+    }
+
+    bool pointsEqual = false;
     for(int i = 0 ; i < mDSize ; ++i) //Generate points
     {
-        temp = mValSort.at(i);
-        m = temp.second;
+        pointsEqual = (i==mBestPointIndex);
+        if(!pointsEqual)
+        {
+            for(int j = 0 ; j < mDim ; ++j)
+            {
+                if(!(mDPositions[(i * mDim) + j] == mDPositions[( mBestPointIndex * mDim ) + j]))
+                {
+                    pointsEqual = false;
+                    break;
+                }
+            }
+        }
+
         for(int j = 0 ; j < mDim ; ++j)
         {
-            tempPm[j] = (mDPositions[(m * mDim) + j] + mDPositions[( mNeighbours[i] * mDim ) + j]) / 2;
-            tempVal = mDPositions[(m * mDim) + j] - mDPositions[( mNeighbours[i] * mDim ) + j];
-            if(m == mBestPointIndex){
-                tempVal = mDPositions[(m * mDim) + j] - mDPositions[( (mValSort.at(1)).second * mDim ) + j];
-            }
-                /*
-            if(i == 0)//change?
-                tempVal = mDPositions[(m * mDim) + j] - mDPositions[( mNeighbours[1] * mDim ) + j];
-            if(tempVal == 0)
-                tempVal = (mBounds[mDim + j] - mBounds[j])/10;
-*/
-            //todo: decide how to do the "local search" for best point
+            tempPm[j] = (mDPositions[(i * mDim) + j] + mDPositions[( mBestPointIndex * mDim ) + j]) / 2;
 
-            for( int k = poolIndices[i] ; k < poolIndices[i + 1] ; ++k)
+            tempD = mDPositions[(i * mDim) + j] - mDPositions[( mBestPointIndex * mDim ) + j];
+
+            if(pointsEqual)
             {
-                mPositions[(k * mDim) + j] = tempPm[j] + (randGauss() * tempVal);
-                //mPositions[(k * mDim) + j] = tempPm[j] + (randDoubleExp() * tempVal);
+                tempD = tempVariance[j];
+            }
+
+            for( int k = mPoolIndices[i] ; k < mPoolIndices[i + 1] ; ++k)
+            {
+                 mPositions[(k * mDim) + j] = tempPm[j] + (randGauss() * tempD);
+
                 if(mPositions[(k * mDim) + j] > mBounds[mDim + j])
                 {
                     mPositions[(k * mDim) + j] = mBounds[mDim + j];
@@ -174,60 +178,49 @@ void NewDev2Population::updatePopulation()
                 {
                     mPositions[(k * mDim) + j] = mBounds[j];
                 }
+
             }
         }
     }
 
     for(int i = 0 ; i < mSize ; ++i)// evaluate points
         mOptFunc->evaluate(&(mPositions[i * mDim]), mValues[i]);
+
     int bestInd;
     for(int i = 0 ; i < mDSize ; ++i) //update points
     {
-        temp = mValSort.at(i);
-        m = temp.second;
-        tempVal = ((double)rand()/(double)RAND_MAX) * mDSize;
         bestInd = -1;
-        if(true)//if(tempVal > i) //choose best
+
+        mDAPValues[i] = 0;
+
+        for( int k = mPoolIndices[i] ; k < mPoolIndices[i + 1] ; ++k)
         {
-            for( int k = poolIndices[i] ; k < poolIndices[i + 1] ; ++k)
+            //mDAPValues[i] += mValues[k];
+            if(mValues[k] < mDValues[i])
             {
-                if(mValues[k] < mDValues[m])
-                {
-                    if(mValues[k] < mDValues[mBestPointIndex])
-                        mBestPointIndex = m;
-                    bestInd = k;
-                    mDValues[m] = mValues[k];
-                }
-            }
-        }
-        else            //choose random
-        {
-            for( int k = poolIndices[i] ; k < poolIndices[i + 1] ; ++k)
-            {   //if a new global best is found, choose that regardless
                 if(mValues[k] < mDValues[mBestPointIndex])
-                {
-                    mBestPointIndex = m;
-                    bestInd = k;
-                    mDValues[m] = mValues[k];
-                }
-            }
-            if(bestInd == -1)
-            {
-                bestInd = (rand() % (poolIndices[i+1] - poolIndices[i])) + poolIndices[i];//random position
-                mDValues[m] = mValues[bestInd];
+                    mBestPointIndex = i;
+                bestInd = k;
+                mDValues[i] = mValues[k];
+                mDAPValues[i] = mDValues[i];
             }
         }
+        //mDAPValues[i] /= (double)(mPoolIndices[i + 1]-mPoolIndices[i]);
+
         if(bestInd != -1)
         {
             for(int j = 0 ; j < mDim ; ++j)
             {
-                mDPositions[(m*mDim) + j] = mPositions[(bestInd * mDim) + j];
+                mDPositions[(i*mDim) + j] = mPositions[(bestInd * mDim) + j];
             }
+
         }
 
     }
 
-    delete[] mNeighbours;
-    delete[] poolIndices;
+
+    delete[] tempPm;
+    delete[] tempMean;
+    delete[] tempVariance;
 }
 

@@ -22,6 +22,8 @@ protected:
     const int mDSize;   //'Distribution' Particles
     double* mDValues;   //Similar to PrevBest, but act differently
     double* mDPositions;
+    double* mDAPValues; //seperate values used for apriori
+    int* mPoolIndices; //points assigned to each dPoint
 
     std::vector<std::pair<double,int> > mValSort;//for sorting, maintained for better performance
 

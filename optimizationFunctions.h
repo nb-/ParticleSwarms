@@ -193,6 +193,25 @@ public:
     }
 };
 
+class SchafferFSixFunction : public OptimizationFunction
+{
+public:
+    SchafferFSixFunction(double* bounds, double* offsets = 0, double* stretch = 0) : OptimizationFunction(2,bounds, offsets, stretch) {}
+
+    static double* getDefaultBounds(int dim)
+    {
+       return new double[4] { -50, -50, 50, 50 };
+    }
+
+    virtual void evaluate(double *position, double &outValue)
+    {
+        outValue = 0.5;
+
+        outValue += (pow( sin( sqrt( (position[0] * position[0]) + (position[1] * position[1]) ) ), 2) - 0.5) / ( pow( 1 + 0.001*( ( (position[0] * position[0]) + (position[1] * position[1]) ) ), 2) );
+
+    }
+};
+
 class RosenbrockFunction : public OptimizationFunction
 {   //Rosenbrock Function, restricted to 2D
 public:

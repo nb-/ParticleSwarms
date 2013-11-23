@@ -5,7 +5,8 @@
 #include <stdlib.h>
 #include <vector>
 #include <utility>
-
+#include <sstream>
+#include <QFileDialog>
 
 #include "population.h"
 #include "canonpsopopulation.h"
@@ -15,6 +16,7 @@
 #include "barebonespsocontroller.h"
 #include "newdev1controller.h"
 #include "newdev2controller.h"
+#include "newdev3controller.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -33,7 +35,8 @@ MainWindow::MainWindow(QWidget *parent) :
     mVisualizeGraphs(0),
     mVisXYRes(200),
     mVisZRes(100),
-    mDim(2)
+    mDim(2),
+    mWorkerThread(0)
 {
     ui->setupUi(this);
     srand(QDateTime::currentMSecsSinceEpoch());
@@ -43,6 +46,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->optimizerCombo->addItem("BareBones Particle Swarm", "barebones");
     ui->optimizerCombo->addItem("NEW: First", "new1");
     ui->optimizerCombo->addItem("NEW: Second", "new2");
+    ui->optimizerCombo->addItem("NEW: Third", "new3");
 
     ui->functionCombo->addItem("Sphere Function", "sphere");
     ui->functionCombo->addItem("Generalized Rastrigin Function", "gRastrigin");
@@ -50,6 +54,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->functionCombo->addItem("Beale's Function", "beal");
     ui->functionCombo->addItem("Goldstein-Price Function", "gp");
     ui->functionCombo->addItem("Griewank Function", "grie");
+    ui->functionCombo->addItem("Schaffer F6 Function", "sf6");
     //ui->functionCombo->addItem("Schwefel Function", "schw");
 
     QObject::connect(ui->stepButton, &QAbstractButton::clicked, this, &MainWindow::stepButtonPressed);
@@ -265,6 +270,10 @@ void MainWindow::createOptimizer(QString optName)
     {
         mOptimizer = new NewDev2Controller();
     }
+    else if ( QString::compare( optName, "new3" ) == 0) // Constriction PSO
+    {
+        mOptimizer = new NewDev3Controller();
+    }
     else
     {
         return;
@@ -354,6 +363,11 @@ void MainWindow::createOptFunc()
     {
         mOptFunc = new GriewankFunction(dim, bounds, translation, scale);
     }
+    else if( QString::compare( optFuncName, "sf6") == 0 )
+    {
+        mOptFunc = new SchafferFSixFunction(bounds, translation, scale);
+    }
+
 //    else if( QString::compare( optFuncName, "schw") == 0 )
 //    {
 //        mOptFunc = new SchwefelFunction(dim, bounds, translation, scale);
@@ -407,12 +421,15 @@ void MainWindow::clearButtonPressed()
 {
     ui->textEdit->clear();
     QCPGraph* t;
-    for(int i = 0 ; i < mTestRunGraphs.size() ; ++i)
+    while(!mTestRunGraphs.empty())
     {
         t = mTestRunGraphs.back();
         mTestRunGraphs.pop_back();
-        delete t;
+        t->clearData();
+        t->parentPlot()->removeGraph((t));
+        //delete t;
     }
+    ui->plot->replot();
 }
 
 void MainWindow::updateGraphScale()
@@ -471,6 +488,11 @@ void MainWindow::functionComboChanged()
         ui->dimSpin->setEnabled(false);
         ui->dimSpin->setValue(2);
     }
+    else if( QString::compare( optFuncName, "sf6") == 0 )
+    {
+        ui->dimSpin->setEnabled(false);
+        ui->dimSpin->setValue(2);
+    }
     else
     {
         ui->dimSpin->setEnabled(true);
@@ -510,6 +532,10 @@ void MainWindow::dimSpinChanged()
     else if( QString::compare( optFuncName, "grie") == 0 )
     {
         defaultBounds = GriewankFunction::getDefaultBounds(dim);
+    }
+    else if( QString::compare( optFuncName, "sf6") == 0 )
+    {
+        defaultBounds = SchafferFSixFunction::getDefaultBounds(dim);
     }
 //    else if( QString::compare( optFuncName, "schw") == 0 )
 //    {
@@ -685,11 +711,112 @@ void MainWindow::resetBoundsButtonPressed()
 {
 
 }
-
-void MainWindow::performTestsButtonPressed()
+void MainWindow::testsComplete(TestRunner *t)
 {
 
+    double* avVals;
+
+    if(ui->testsPlotAvCheck->checkState() == Qt::Checked)
+    {
+        avVals = new double[t->getMaxIt() + 1];
+        for(int i = 0 ; i <= t->getMaxIt() ; ++i)
+            avVals[i] = 0;
+    }
+
+
+    for(int i = 0 ; i < t->getRepetitions() ; ++i)
+    {
+        if(ui->testsPlotAvCheck->checkState() == Qt::Checked)
+        {
+            for(int j = 0 ; j <= t->getMaxIt() ; ++j)
+                avVals[j] += t->mValues[i][j];
+        }
+
+        if(ui->testsPlotEachBox->checkState() == Qt::Checked)
+        {
+            mTestRunGraphs.push_back( ui->graph->addGraph() );
+
+            QCPGraph* tempG = mTestRunGraphs.back();
+
+            tempG->clearData();
+            tempG->setLineStyle( QCPGraph::lsLine );
+            tempG->setScatterStyle( QCP::ssNone );
+            tempG->setScatterSize(4);
+
+            tempG->setPen( QPen( QColor::fromHsv(100, 255 , 255),  Qt::SolidPattern) );
+
+            for(int j = 0 ; j <= t->getMaxIt() ; ++j)
+            {
+                tempG->addData(j, t->mValues[i][j]);
+
+            }
+
+        }
+        ui->graph->xAxis->setRange(0, t->getMaxIt());
+        ui->graph->yAxis->setRange(0, t->mValues[i][0]);
+    }
+
+
+    if(ui->testsPlotAvCheck->checkState() == Qt::Checked)
+    {
+        mTestRunGraphs.push_back( ui->graph->addGraph() );
+
+        QCPGraph* tempG = mTestRunGraphs.back();
+
+        tempG->clearData();
+        tempG->setLineStyle( QCPGraph::lsLine );
+        tempG->setScatterStyle( QCP::ssNone );
+        tempG->setScatterSize(4);
+
+
+
+        tempG->setPen( QPen( QColor::fromHsv((rand() % 126)*2, 255 , 255),  Qt::SolidPattern) );
+
+        for(int j = 0 ; j <= t->getMaxIt() ; ++j)
+        {
+            tempG->addData(j, avVals[j] / (double)t->getRepetitions());
+        }
+        delete[] avVals;
+    }
+    ui->graph->replot();
+
+    t->deleteLater();
+}
+void MainWindow::performTestsButtonPressed()
+{
     createOptFunc();
+    if(mWorkerThread ==0) mWorkerThread = new QThread(this);
+
+    bool save = ui->saveCheck->checkState() == Qt::Checked;
+    QString dir = "";
+    if(save)
+        dir = QFileDialog::getSaveFileName(this);
+
+    int dim = ui->dimSpin->value();
+
+    double* initBounds = 0;
+
+    if(ui->offsetInitCheck->checkState() == Qt::Checked)
+    {
+        initBounds = new double[dim*2];
+
+        for(int i = 0 ; i < dim ; ++i)
+        {
+            initBounds[i] = mUpperBoundSpins[i]->value() - (mUpperBoundSpins[i]->value() - mLowerBoundSpins[i]->value()) / 4;
+            initBounds[i + dim] = mUpperBoundSpins[i]->value();
+        }
+    }
+
+    TestRunner* tester = new TestRunner(mOptimizer, mOptFunc, ui->runForSpin->value(),ui->numTestsSpin->value(), save, dir , initBounds );
+
+    tester->moveToThread(mWorkerThread);
+    mWorkerThread->start();
+    connect(tester, &TestRunner::finished, this, &MainWindow::testsComplete);
+    connect(tester, &TestRunner::progressUpdate, this, &MainWindow::printTestProgress);
+    QMetaObject::invokeMethod(tester, "run", Qt::QueuedConnection);
+
+/*
+
 
     int dim = ui->dimSpin->value();
 
@@ -762,7 +889,20 @@ void MainWindow::performTestsButtonPressed()
     ui->graph->yAxis->setRange(0, vals[0]);
     ui->graph->replot();
     std::cout << "Best: " <<  mOptimizer->getBestValue() << std::endl;
+    */
 }
+
+void MainWindow::printTestProgress(int completed, int total, double bestVal)
+{
+    std::stringstream o;
+    o << "Completed Test " << completed << " of " << total << "\n"
+      << " Best: " << bestVal << "\n";
+
+    std::string s = o.str();
+    ui->textEdit->append(QString::fromStdString(s));
+}
+
+
 
 MainWindow::~MainWindow()
 {   //TODO: several things not deleted properly due to laziness, fix when not lazy (hahaha yeah right)
@@ -799,6 +939,7 @@ MainWindow::~MainWindow()
     delete qout;
     delete ui;
 
+    if(mWorkerThread!=0) mWorkerThread->deleteLater();
 
 }
 

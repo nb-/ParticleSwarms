@@ -58,6 +58,7 @@ public:
     virtual void setParameterBox(QWidget* parent) = 0;
     void removeParameterBox(QWidget* parent);
     virtual void initializeOptimizer(OptimizationFunction* optFunc, double* initRange = 0);
+
 };
 
 #endif // OPTIMIZERCONTROLLER_H

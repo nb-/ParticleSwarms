@@ -30,7 +30,10 @@ SOURCES += main.cpp\
     population.cpp \
     newdev1controller.cpp \
     newdev2population.cpp \
-    newdev2controller.cpp
+    newdev2controller.cpp \
+    testrunner.cpp \
+    newdev3population.cpp \
+    newdev3controller.cpp
 
 HEADERS  += mainwindow.h \
     optimizationFunctions.h \
@@ -50,6 +53,9 @@ HEADERS  += mainwindow.h \
     population.h \
     newdev1controller.h \
     newdev2population.h \
-    newdev2controller.h
+    newdev2controller.h \
+    testrunner.h \
+    newdev3population.h \
+    newdev3controller.h
 
 FORMS    += mainwindow.ui

@@ -8,6 +8,8 @@
 #include "QDebugStream.h"
 #include <QDoubleSpinBox>
 #include <QVBoxLayout>
+#include "testrunner.h"
+#include <QThread>
 
 namespace Ui {
 class MainWindow;
@@ -40,6 +42,7 @@ private:
     QVBoxLayout* mTranslateLayout;
 
     std::vector<QCPGraph*> mTestRunGraphs;
+    QThread* mWorkerThread;
 
     //stuff for plotting function topologies
     bool mVisualize;
@@ -78,6 +81,9 @@ public:
     void resetBoundsButtonPressed();
 
     void performTestsButtonPressed();
+
+    void printTestProgress(int completed,int total,double bestVal);
+    void testsComplete(TestRunner* t);
 
 };
 
